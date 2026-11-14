@@ -7,10 +7,10 @@
 <style>
   :root{
     --bg:#f5f6f8; --card:#fff; --text:#1c1f26; --muted:#6b7280; --line:#e5e7eb;
-    --accent:#4f46e5; --accent-soft:#eef2ff; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.05);
+    --accent:#4f46e5; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.05);
   }
   @media (prefers-color-scheme:dark){
-    :root{--bg:#0f1115;--card:#171a21;--text:#e8eaf0;--muted:#9aa3b2;--line:#262b36;--accent:#818cf8;--accent-soft:#1e2140;--shadow:none}
+    :root{--bg:#0f1115;--card:#171a21;--text:#e8eaf0;--muted:#9aa3b2;--line:#262b36;--shadow:none}
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -18,17 +18,28 @@
   header{display:flex;flex-wrap:wrap;gap:16px;align-items:end;justify-content:space-between;margin-bottom:24px}
   h1{margin:0;font-size:28px;letter-spacing:-.02em}
   .sub{color:var(--muted);margin:4px 0 0}
-  .search{flex:1 1 260px;max-width:360px}
-  .search input{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:15px;outline:none}
-  .search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .tools{flex:1 1 300px;max-width:440px;display:flex;gap:8px}
+  .tools input{flex:1;min-width:0;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:15px;outline:none}
+  .tools input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
+  .btn{flex:none;display:inline-flex;align-items:center;gap:6px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:14px;cursor:pointer}
+  .btn:hover{border-color:var(--accent)}
+  .btn[disabled]{opacity:.6;cursor:progress}
+  .btn .spin{display:inline-block}
+  .btn[disabled] .spin{animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
-  .chip{border:1px solid var(--line);background:var(--card);color:var(--text);padding:7px 14px;border-radius:999px;font-size:14px;cursor:pointer}
-  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
-  h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:28px 0 12px}
+  .chip{--c:var(--accent);border:1px solid var(--line);background:var(--card);color:var(--text);padding:7px 14px;border-radius:999px;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--c)}
+  .chip.on{background:var(--c);border-color:var(--c);color:#fff}
+  .chip.on .dot{background:#fff}
+  section{--c:var(--accent)}
+  h2{display:flex;align-items:center;gap:8px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:28px 0 12px}
+  h2::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--c)}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
-  a.card{display:flex;gap:14px;align-items:flex-start;padding:16px;background:var(--card);border:1px solid var(--line);border-radius:16px;text-decoration:none;color:inherit;box-shadow:var(--shadow);transition:transform .15s,border-color .15s}
-  a.card:hover{transform:translateY(-2px);border-color:var(--accent)}
-  .ico{flex:none;width:44px;height:44px;border-radius:12px;background:var(--accent-soft);display:grid;place-items:center;font-size:22px}
+  a.card{display:flex;gap:14px;align-items:flex-start;padding:16px;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--c);border-radius:16px;text-decoration:none;color:inherit;box-shadow:var(--shadow);transition:transform .15s,border-color .15s}
+  a.card:hover{transform:translateY(-2px);border-color:var(--c)}
+  .ico{flex:none;width:44px;height:44px;border-radius:12px;background:color-mix(in srgb,var(--c) 14%,var(--card));display:grid;place-items:center;font-size:22px;overflow:hidden}
+  .ico img{width:28px;height:28px;object-fit:contain}
   .name{font-weight:600;margin:0 0 2px}
   .desc{color:var(--muted);font-size:14px;margin:0}
   .tag{display:inline-block;margin-top:8px;font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 7px}
@@ -41,9 +52,12 @@
   <header>
     <div>
       <h1 id="titulo">Mi Panel</h1>
-      <p class="sub" id="subtitulo">Aplicaciones, planillas y documentos</p>
+      <p class="sub" id="subtitulo"></p>
     </div>
-    <div class="search"><input id="q" type="search" placeholder="Buscar…" autocomplete="off"></div>
+    <div class="tools">
+      <input id="q" type="search" placeholder="Buscar…" autocomplete="off">
+      <button class="btn" id="refresh" type="button" title="Leer la hoja ahora, sin usar la copia guardada"><span class="spin">↻</span><span id="refreshTxt">Actualizar</span></button>
+    </div>
   </header>
   <div class="chips" id="chips"></div>
   <main id="app"><p class="status">Cargando…</p></main>
@@ -51,27 +65,45 @@
 </div>
 
 <script>
-/* ============ CONFIGURACIÓN (lo único que se toca una vez) ============ */
+/* ================= CONFIGURACIÓN (se toca una sola vez) =================
+   Publicá cada pestaña de la hoja por separado:
+   Archivo > Compartir > Publicar en la web > elegir la pestaña > formato CSV.
+   - ACCESOS_CSV_URL: link CSV de la pestaña "Accesos" (obligatorio).
+   - CONFIG_CSV_URL:  link CSV de la pestaña "Configuracion" (opcional).
+   Si ACCESOS_CSV_URL queda vacío, se muestra un ejemplo de demostración.
+   TITULO y SUBTITULO de acá solo se usan si la hoja no los define.        */
 const CONFIG = {
-  // Pegá acá el link de la hoja publicada como CSV
-  // (Archivo > Compartir > Publicar en la web > elegir la pestaña > formato CSV).
-  // Si queda vacío, se muestra un ejemplo de demostración.
-  SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQAUKQa5J2Kk6wjjUZt6-89UwQTfK46XPDwMr3oN8risYYIQYTe57D3-aPf5rzuxhWBcOpNKj3zbCv3/pub?gid=51196652&single=true&output=csv",
+  ACCESOS_CSV_URL: "",
+  CONFIG_CSV_URL: "",
   TITULO: "Mi Panel",
   SUBTITULO: "Aplicaciones, planillas y documentos",
   CACHE_MINUTOS: 5
 };
-/* ====================================================================== */
+/* ======================================================================= */
 
-const DEMO = `Nombre,Descripcion,URL,Categoria,Icono,Activo,Orden
+const DEMO_ACCESOS = `Nombre,Descripcion,URL,Categoria,Icono,Activo,Orden
 Buscador de películas,Búsqueda por tags y actores,https://example.com/peliculas,Aplicaciones,🎬,SI,1
 Indicadores económicos,Planilla de seguimiento,https://docs.google.com/spreadsheets/d/xxxx,Planillas,📊,SI,2
 Autoguardado,Script de autoguardado de texto,https://github.com/usuario/repo,Repositorios,💾,SI,3
 Manual interno,Documento de procedimientos,https://drive.google.com/file/d/xxxx,Documentos,📄,SI,4
-Proyecto en pausa,Este no se muestra (Activo = NO),https://example.com/oculto,Aplicaciones,🚧,NO,5`;
+Ícono desde una imagen,La columna Icono también acepta un link a PNG o SVG,https://lucide.dev,Aplicaciones,https://unpkg.com/lucide-static/icons/rocket.svg,SI,5
+Proyecto en pausa,Este no se muestra (Activo = NO),https://example.com/oculto,Aplicaciones,🚧,NO,6`;
+
+const DEMO_CONFIG = `Parametro,Valor,,Categoria,Orden,Color
+Titulo,Mi Panel,,Aplicaciones,1,#4f46e5
+Subtitulo,"Aplicaciones, planillas y documentos",,Planillas,2,#16a34a
+Color principal,#4f46e5,,Repositorios,3,#0891b2
+,,,Documentos,4,#ea580c`;
 
 const $ = s => document.querySelector(s);
-let items = [], cat = "Todas", term = "";
+const CACHE_KEY = "panel_cache_v2";
+let items = [], cfg = null, cat = "Todas", term = "";
+
+/* ---------- utilidades ---------- */
+const norm = s => (s ?? "").trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const okColor = v => !!v && CSS.supports("color", v) ? v : "";
+const isUrl = v => /^https?:\/\//i.test(v);
 
 function parseCSV(t){
   const rows=[]; let row=[], cur="", q=false;
@@ -93,74 +125,154 @@ function parseCSV(t){
   return rows;
 }
 
+/* Devuelve filas como objetos con claves normalizadas (sin acentos ni mayúsculas) */
+function table(csv){
+  const [head=[], ...rows] = parseCSV(csv || "");
+  const keys = head.map(norm);
+  return rows.map(r => { const o={}; keys.forEach((k,i)=>{ if(k) o[k]=(r[i]??"").trim() }); return o; });
+}
+
+/* ---------- pestaña Accesos ---------- */
 function toItems(csv){
-  const [head,...rows]=parseCSV(csv);
-  const norm=s=>s.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-  const idx={}; head.forEach((h,i)=>idx[norm(h)]=i);
-  const get=(r,k)=>(r[idx[k]]??"").trim();
-  return rows.map(r=>({
-    nombre:get(r,"nombre"), desc:get(r,"descripcion"), url:get(r,"url"),
-    cat:get(r,"categoria")||"General", ico:get(r,"icono")||"🔗",
-    activo:/^(si|sí|true|1|x|yes)$/i.test(get(r,"activo")),
-    orden:parseFloat(get(r,"orden"))||9999
-  })).filter(x=>x.activo && x.nombre && /^https?:\/\//i.test(x.url))
+  return table(csv).map(r=>({
+    nombre:r.nombre||"", desc:r.descripcion||"", url:r.url||"",
+    cat:r.categoria||"General", ico:r.icono||"🔗",
+    activo:/^(si|sí|true|1|x|yes)$/i.test(r.activo||""),
+    orden:parseFloat(r.orden)
+  })).filter(x=>x.activo && x.nombre && isUrl(x.url))
+    .map(x=>({...x, orden:isNaN(x.orden)?9999:x.orden}))
     .sort((a,b)=>a.orden-b.orden);
+}
+
+/* ---------- pestaña Configuracion ----------
+   Columnas A-B: Parametro | Valor   (Titulo, Subtitulo, Color principal)
+   Columnas D-F: Categoria | Orden | Color                                 */
+function toConfig(csv){
+  const out = { params:{}, cats:{} };
+  table(csv).forEach(r=>{
+    if(r.parametro) out.params[norm(r.parametro)] = r.valor || "";
+    if(r.categoria){
+      const o = parseFloat(r.orden);
+      out.cats[norm(r.categoria)] = { orden:isNaN(o)?9999:o, color:okColor(r.color) };
+    }
+  });
+  return out;
+}
+
+const catInfo = name => (cfg && cfg.cats[norm(name)]) || { orden:9999, color:"" };
+
+function orderedCats(){
+  const seen=[]; items.forEach(i=>{ if(!seen.includes(i.cat)) seen.push(i.cat) });
+  return seen.map((c,ix)=>({c,ix,o:catInfo(c).orden}))
+             .sort((a,b)=>a.o-b.o || a.ix-b.ix).map(x=>x.c);
 }
 
 function tipo(u){
   if(u.includes("docs.google.com/spreadsheets"))return "Google Sheets";
   if(u.includes("docs.google.com/document"))return "Google Docs";
   if(u.includes("docs.google.com/presentation"))return "Google Slides";
+  if(u.includes("docs.google.com/forms"))return "Google Forms";
   if(u.includes("drive.google.com"))return "Drive";
   if(u.includes("github.com"))return "GitHub";
   try{return new URL(u).hostname.replace(/^www\./,"")}catch{return ""}
 }
 
-const esc=s=>s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const colorStyle = c => { const col = catInfo(c).color; return col ? ` style="--c:${esc(col)}"` : ""; };
 
-function render(){
-  const cats=["Todas",...new Set(items.map(i=>i.cat))];
-  $("#chips").innerHTML=cats.map(c=>`<button class="chip ${c===cat?"on":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("");
-  const t=term.toLowerCase();
-  const list=items.filter(i=>(cat==="Todas"||i.cat===cat)&&(!t||(i.nombre+" "+i.desc+" "+i.cat).toLowerCase().includes(t)));
-  if(!list.length){$("#app").innerHTML='<p class="empty">No hay accesos para mostrar.</p>';return}
-  const groups={}; list.forEach(i=>(groups[i.cat]??=[]).push(i));
-  $("#app").innerHTML=Object.entries(groups).map(([g,arr])=>`
-    <h2>${esc(g)}</h2>
-    <div class="grid">${arr.map(i=>`
-      <a class="card" href="${esc(i.url)}" target="_blank" rel="noopener noreferrer">
-        <div class="ico">${esc(i.ico)}</div>
-        <div><p class="name">${esc(i.nombre)}</p><p class="desc">${esc(i.desc)}</p><span class="tag">${esc(tipo(i.url))}</span></div>
-      </a>`).join("")}</div>`).join("");
+function icon(v){
+  if(isUrl(v)) return `<img src="${esc(v)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith('🔗')">`;
+  return esc(v);
 }
 
-async function load(){
-  $("#titulo").textContent=CONFIG.TITULO; document.title=CONFIG.TITULO;
-  $("#subtitulo").textContent=CONFIG.SUBTITULO;
-  let csv=DEMO, nota="Modo demostración: configurá SHEET_CSV_URL para usar tu hoja.";
-  if(CONFIG.SHEET_CSV_URL){
-    const key="panel_cache";
-    try{
-      const c=JSON.parse(localStorage.getItem(key)||"null");
-      if(c&&Date.now()-c.t<CONFIG.CACHE_MINUTOS*60000){csv=c.csv;nota=""}
-      else throw 0;
-    }catch{
+/* ---------- dibujo ---------- */
+function render(){
+  const cats = orderedCats();
+  if(cat!=="Todas" && !cats.includes(cat)) cat="Todas";
+  $("#chips").innerHTML = ["Todas",...cats].map(c=>
+    `<button class="chip ${c===cat?"on":""}" data-c="${esc(c)}"${c==="Todas"?"":colorStyle(c)}>${c==="Todas"?"":'<span class="dot"></span>'}${esc(c)}</button>`).join("");
+  const t = norm(term);
+  const list = items.filter(i=>(cat==="Todas"||i.cat===cat) && (!t||norm(i.nombre+" "+i.desc+" "+i.cat).includes(t)));
+  if(!list.length){ $("#app").innerHTML='<p class="empty">No hay accesos para mostrar.</p>'; return; }
+  $("#app").innerHTML = cats.filter(c=>list.some(i=>i.cat===c)).map(c=>`
+    <section${colorStyle(c)}>
+      <h2>${esc(c)}</h2>
+      <div class="grid">${list.filter(i=>i.cat===c).map(i=>`
+        <a class="card" href="${esc(i.url)}" target="_blank" rel="noopener noreferrer">
+          <div class="ico">${icon(i.ico)}</div>
+          <div><p class="name">${esc(i.nombre)}</p><p class="desc">${esc(i.desc)}</p><span class="tag">${esc(tipo(i.url))}</span></div>
+        </a>`).join("")}</div>
+    </section>`).join("");
+}
+
+function applyConfig(){
+  const p = (cfg && cfg.params) || {};
+  const titulo = p["titulo"] || CONFIG.TITULO;
+  $("#titulo").textContent = titulo; document.title = titulo;
+  $("#subtitulo").textContent = p["subtitulo"] ?? CONFIG.SUBTITULO;
+  const acc = okColor(p["color principal"]);
+  if(acc) document.documentElement.style.setProperty("--accent", acc);
+  else document.documentElement.style.removeProperty("--accent");
+}
+
+/* ---------- lectura de la hoja ---------- */
+function readCache(){ try{ return JSON.parse(localStorage.getItem(CACHE_KEY)||"null") }catch{ return null } }
+function writeCache(d){ try{ localStorage.setItem(CACHE_KEY, JSON.stringify(d)) }catch{} }
+
+async function fetchCSV(url){
+  const u = url + (url.includes("?") ? "&" : "?") + "_=" + Date.now();   // evita copias intermedias
+  const r = await fetch(u, { cache:"no-store" });
+  if(!r.ok) throw new Error("HTTP " + r.status);
+  const txt = await r.text();
+  if(/^\s*(<!doctype html|<html)/i.test(txt)) throw new Error("La hoja no está publicada como CSV");
+  return txt;
+}
+
+function setBusy(b){
+  $("#refresh").disabled = b;
+  $("#refreshTxt").textContent = b ? "Actualizando…" : "Actualizar";
+}
+
+const fmt = t => new Date(t).toLocaleString("es-AR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+
+async function load(force=false){
+  setBusy(true);
+  let acc = DEMO_ACCESOS, conf = DEMO_CONFIG, t = null,
+      nota = "Modo demostración: configurá ACCESOS_CSV_URL para usar tu hoja.";
+
+  if(CONFIG.ACCESOS_CSV_URL){
+    const src = CONFIG.ACCESOS_CSV_URL + "|" + CONFIG.CONFIG_CSV_URL;
+    const c = readCache(), valid = c && c.src === src;
+    if(!force && valid && Date.now() - c.t < CONFIG.CACHE_MINUTOS*60000){
+      ({acc, conf, t} = c); nota = "";
+    } else {
       try{
-        const r=await fetch(CONFIG.SHEET_CSV_URL,{cache:"no-store"});
-        if(!r.ok)throw 0;
-        csv=await r.text(); nota="";
-        try{localStorage.setItem(key,JSON.stringify({t:Date.now(),csv}))}catch{}
-      }catch{
-        try{const c=JSON.parse(localStorage.getItem(key)||"null"); if(c){csv=c.csv;nota="Sin conexión con la hoja: mostrando la última copia guardada."}
-          else{$("#app").innerHTML='<p class="status">No se pudo leer la hoja. Revisá que esté publicada en la web.</p>';return}}catch{return}
+        const [a, k] = await Promise.all([
+          fetchCSV(CONFIG.ACCESOS_CSV_URL),
+          CONFIG.CONFIG_CSV_URL ? fetchCSV(CONFIG.CONFIG_CSV_URL).catch(()=>null) : Promise.resolve("")
+        ]);
+        acc = a; t = Date.now(); nota = "";
+        if(k === null){ conf = valid ? c.conf : ""; nota = "No se pudo leer la pestaña Configuracion: se usan los valores anteriores."; }
+        else conf = k;
+        writeCache({ src, t, acc, conf });
+      }catch(e){
+        if(valid){ ({acc, conf, t} = c); nota = "Sin conexión con la hoja: mostrando la última copia guardada."; }
+        else{
+          $("#app").innerHTML = '<p class="status">No se pudo leer la hoja. Revisá que la pestaña esté publicada en la web como CSV.</p>';
+          $("#foot").textContent = ""; setBusy(false); return;
+        }
       }
     }
   }
-  items=toItems(csv); $("#foot").textContent=nota; render();
+
+  cfg = toConfig(conf); items = toItems(acc);
+  applyConfig(); render();
+  $("#foot").textContent = [nota, t ? "Actualizado: " + fmt(t) : ""].filter(Boolean).join(" · ");
+  setBusy(false);
 }
 
-$("#chips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(b){cat=b.dataset.c;render()}});
-$("#q").addEventListener("input",e=>{term=e.target.value;render()});
+$("#chips").addEventListener("click", e=>{ const b=e.target.closest(".chip"); if(b){ cat=b.dataset.c; render(); } });
+$("#q").addEventListener("input", e=>{ term=e.target.value; render(); });
+$("#refresh").addEventListener("click", ()=>load(true));
 load();
 </script>
 </body>
