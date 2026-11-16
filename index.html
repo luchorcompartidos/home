@@ -44,6 +44,20 @@
   .desc{color:var(--muted);font-size:14px;margin:0}
   .tag{display:inline-block;margin-top:8px;font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 7px}
   .empty,.status{color:var(--muted);text-align:center;padding:40px 0}
+  .ttl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .ver{border:1px solid var(--line);background:var(--card);color:var(--muted);font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;cursor:pointer}
+  .ver:hover{border-color:var(--accent);color:var(--accent)}
+  dialog{border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--text);padding:20px;max-width:min(560px,92vw);width:100%;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+  dialog::backdrop{background:rgba(0,0,0,.4)}
+  dialog h3{margin:0 0 8px}
+  dialog .rels{max-height:60vh;overflow:auto}
+  .rel{border-top:1px solid var(--line);padding:10px 0}
+  .rel b{color:var(--accent)}
+  .rel pre{white-space:pre-wrap;font:inherit;font-size:14px;color:var(--muted);margin:4px 0 0}
+  .acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px}
+  .acts a,.acts button{text-decoration:none;padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:14px;cursor:pointer}
+  .acts .pri{background:var(--accent);border-color:var(--accent);color:#fff}
+  .muted{color:var(--muted)}
   footer{margin-top:40px;text-align:center;color:var(--muted);font-size:12px}
 </style>
 </head>
@@ -51,7 +65,7 @@
 <div class="wrap">
   <header>
     <div>
-      <h1 id="titulo">Mi Panel</h1>
+      <div class="ttl"><h1 id="titulo">Mi Panel</h1><button class="ver" id="verBtn" type="button" title="Versión">v—</button></div>
       <p class="sub" id="subtitulo"></p>
     </div>
     <div class="tools">
@@ -59,6 +73,7 @@
       <button class="btn" id="refresh" type="button" title="Leer la hoja ahora, sin usar la copia guardada"><span class="spin">↻</span><span id="refreshTxt">Actualizar</span></button>
     </div>
   </header>
+  <dialog id="dlg"></dialog>
   <div class="chips" id="chips"></div>
   <main id="app"><p class="status">Cargando…</p></main>
   <footer id="foot"></footer>
@@ -273,6 +288,52 @@ async function load(force=false){
 $("#chips").addEventListener("click", e=>{ const b=e.target.closest(".chip"); if(b){ cat=b.dataset.c; render(); } });
 $("#q").addEventListener("input", e=>{ term=e.target.value; render(); });
 $("#refresh").addEventListener("click", ()=>load(true));
+/* ---------- Versión y Changelog (desde las Releases de GitHub) ----------
+   Muestra la versión más alta publicada. La fecha es la del archivo más reciente
+   adjunto a esa Release (si no tiene adjuntos, la de publicación).                */
+const REPO = "luchorcompartidos/home";
+const RELS_KEY = "panel_rels";
+let rels = null; try{ rels = JSON.parse(localStorage.getItem(RELS_KEY)||"null") }catch{}
+const fmtDT = s => new Date(s).toLocaleString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+const semv = t => (t.replace(/^v/,"").split(".").map(n=>parseInt(n)||0).concat([0,0,0])).slice(0,3);
+const cmpV = (a,b) => { const x=semv(a), y=semv(b); for(let i=0;i<3;i++) if(x[i]!==y[i]) return y[i]-x[i]; return 0; };
+function showVer(){ $("#verBtn").textContent = rels && rels[0] ? rels[0].tag : "v—"; }
+async function loadRels(){
+  try{
+    const r = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=100`,{headers:{Accept:"application/vnd.github+json"}});
+    if(!r.ok) return;
+    rels = (await r.json()).filter(x=>!x.draft && !x.prerelease).map(x=>{
+      const fechas = (x.assets||[]).map(a=>a.updated_at).filter(Boolean).sort();
+      return { tag:x.tag_name, date:fechas.length ? fechas[fechas.length-1] : (x.published_at||x.created_at),
+               deArchivo:fechas.length>0, body:x.body||"", url:x.html_url };
+    }).sort((a,b)=>cmpV(a.tag,b.tag));
+    try{ localStorage.setItem(RELS_KEY, JSON.stringify(rels)) }catch{}
+    showVer();
+  }catch{}
+}
+function dialog(html){
+  const d = $("#dlg"); d.innerHTML = html;
+  d.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>d.close());
+  if(!d.open) d.showModal();
+  return d;
+}
+function openVer(){
+  const r = rels && rels[0];
+  const d = dialog(`<h3>Versión ${esc(r ? r.tag : "desconocida")}</h3>
+    <p class="muted">${r ? (r.deArchivo ? "Archivos actualizados el " : "Publicada el ") + "<b>" + fmtDT(r.date) + "</b>"
+                        : "Todavía no se pudo consultar la versión (requiere conexión)."}</p>
+    <div class="acts"><button class="pri" id="vLog" type="button">📋 Changelog</button><button data-x type="button">Cerrar</button></div>`);
+  d.querySelector("#vLog").onclick = openLog;
+}
+function openLog(){
+  const list = (rels||[]).map(r=>`<div class="rel"><b>${esc(r.tag)}</b> · <span class="muted">${fmtDT(r.date)}</span>${r.body?`<pre>${esc(r.body)}</pre>`:""}</div>`).join("");
+  dialog(`<h3>Changelog</h3><div class="rels">${list || '<p class="muted">Sin datos todavía (requiere conexión).</p>'}</div>
+    <div class="acts"><a href="https://github.com/${REPO}/releases" target="_blank" rel="noopener">Ver Releases en GitHub ↗</a><button data-x type="button">Cerrar</button></div>`);
+}
+$("#dlg").addEventListener("click", e=>{ if(e.target.id==="dlg") e.target.close(); });
+$("#verBtn").addEventListener("click", openVer);
+showVer(); loadRels();
+
 load();
 </script>
 </body>
