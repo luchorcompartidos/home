@@ -26,6 +26,11 @@ on:
         required: false
         default: index.html
         type: string
+      incluir_planilla:
+        description: "Adjuntar la planilla publicada (versión actual descargada de Google)"
+        required: false
+        default: true
+        type: boolean
       notas:
         description: "Notas del Release (vacío = mensaje del último commit)"
         required: false
@@ -33,6 +38,11 @@ on:
 
 permissions:
   contents: write
+
+env:
+  # Planilla publicada en la web como .xlsx (Todo el documento).
+  PLANILLA_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQAUKQa5J2Kk6wjjUZt6-89UwQTfK46XPDwMr3oN8risYYIQYTe57D3-aPf5rzuxhWBcOpNKj3zbCv3/pub?output=xlsx"
+  PLANILLA_NOMBRE: "Mi_Panel_planilla.xlsx"
 
 concurrency:
   group: release
@@ -70,6 +80,12 @@ jobs:
             [ -f "$f" ] || { echo "::error::No existe el archivo '$f' en la rama $RAMA."; exit 1; }
           done
 
+      - name: Descargar planilla
+        if: ${{ inputs.incluir_planilla }}
+        run: |
+          curl -fsSL "$PLANILLA_URL" -o "$PLANILLA_NOMBRE" || { echo "::error::No se pudo descargar la planilla. Revisá que siga publicada como .xlsx."; exit 1; }
+          head -c 2 "$PLANILLA_NOMBRE" | grep -q PK || { echo "::error::Lo descargado no es un .xlsx. Revisá la publicación (Todo el documento, formato .xlsx)."; exit 1; }
+
       - name: Borrar Release y tag existentes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -95,7 +111,9 @@ jobs:
           V: ${{ inputs.version }}
           ADJ: ${{ inputs.adjuntos }}
           NOTAS: ${{ inputs.notas }}
+          PLAN: ${{ inputs.incluir_planilla }}
         run: |
+          [ "$PLAN" = "true" ] && ADJ="$ADJ $PLANILLA_NOMBRE"
           sha=$(git rev-parse HEAD)
           [ -n "$NOTAS" ] || NOTAS="$(git log -1 --pretty=%s) (commit ${sha::7})"
           git tag "$V" "$sha"
