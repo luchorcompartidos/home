@@ -1,65 +1,114 @@
 name: Tag y Release automáticos
 
-# Esquema de versiones (en cada push a main):
-#   - Normal:                      v0.1 -> v0.2 -> v0.3 ...
-#   - "[patch]" en el mensaje:     v0.3 -> v0.3.1 -> v0.3.2 (el siguiente normal pasa a v0.4)
-#   - "[major]" en el mensaje:     v0.9 -> v1.0
-#   - "[skip release]" en el mensaje: no crea tag ni Release
+# Tipo de Release según el mensaje del commit (push a main):
+#   "[major]"  v0.9   -> v1.0
+#   "[minor]"  v0.3   -> v0.4
+#   "[patch]"  v0.3   -> v0.3.1 -> v0.3.2 (el siguiente minor pasa a v0.4)
+#   sin etiqueta (o "[skip release]"): NO crea tag ni Release; deja un aviso
+#   en la corrida con el link para crearlo a mano si se quiere.
+# Creación a mano: Actions > "Tag y Release automáticos" > Run workflow > elegir tipo.
 # Después de v0.9 sigue v0.10 (estándar semántico), salvo que uses [major].
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      tipo:
+        description: "Tipo de Release a crear sobre el último commit de main"
+        required: true
+        default: patch
+        type: choice
+        options: [patch, minor, major]
 
 permissions:
   contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 env:
   # Planilla publicada en la web como .xlsx (Todo el documento). Se adjunta a cada Release.
   PLANILLA_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQAUKQa5J2Kk6wjjUZt6-89UwQTfK46XPDwMr3oN8risYYIQYTe57D3-aPf5rzuxhWBcOpNKj3zbCv3/pub?output=xlsx"
   PLANILLA_NOMBRE: "Mi_Panel_planilla.xlsx"
 
-concurrency:
-  group: release
-  cancel-in-progress: false
-
 jobs:
   release:
-    if: ${{ !contains(github.event.head_commit.message, '[skip release]') }}
     runs-on: ubuntu-latest
     steps:
+      - name: Determinar tipo de Release
+        id: tipo
+        env:
+          EVENTO: ${{ github.event_name }}
+          TIPO_MANUAL: ${{ inputs.tipo }}
+          MSG: ${{ github.event.head_commit.message }}
+          LINK: ${{ github.server_url }}/${{ github.repository }}/actions/workflows/release.yml
+        run: |
+          if [ "$EVENTO" = "workflow_dispatch" ]; then
+            tipo="$TIPO_MANUAL"
+          elif grep -q '\[skip release\]' <<< "$MSG"; then
+            tipo=""
+          elif grep -q '\[major\]' <<< "$MSG"; then tipo="major"
+          elif grep -q '\[minor\]' <<< "$MSG"; then tipo="minor"
+          elif grep -q '\[patch\]' <<< "$MSG"; then tipo="patch"
+          else
+            tipo=""
+          fi
+          echo "tipo=$tipo" >> "$GITHUB_OUTPUT"
+          if [ -z "$tipo" ]; then
+            echo "::warning title=Sin Release::Este push no indica tipo de Release ([major], [minor] o [patch]). El sitio se publica igual, pero NO se creó tag ni Release. Si querés crearlo: Actions > Tag y Release automáticos > Run workflow > elegir tipo."
+            {
+              echo "## ⚠️ Push sin Release"
+              echo
+              echo "El mensaje del commit no indica tipo de Release, así que **no se creó tag ni Release**. El sitio se publica igual."
+              echo
+              echo "**¿Querés avanzar así?** No hace falta hacer nada."
+              echo
+              echo "**¿Preferís crear una versión de este cambio?** Entrá a [Tag y Release automáticos]($LINK), tocá **Run workflow** y elegí el tipo (patch, minor o major)."
+              echo
+              echo "Para la próxima, agregá \`[patch]\`, \`[minor]\` o \`[major]\` al mensaje del commit."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.tipo.outputs.tipo != ''
         with:
+          ref: main
           fetch-depth: 0
+
       - name: Calcular siguiente versión y crear tag + Release
+        if: steps.tipo.outputs.tipo != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MSG: ${{ github.event.head_commit.message }}
+          TIPO: ${{ steps.tipo.outputs.tipo }}
         run: |
           last=$(git tag -l 'v*' | grep -E '^v[0-9]+\.[0-9]+(\.[0-9]+)?$' | sort -V | tail -1)
           if [ -z "$last" ]; then
             next="v0.1"
           else
             IFS=. read -r X Y Z <<< "${last#v}"
-            if   grep -q '\[major\]' <<< "$MSG"; then next="v$((X+1)).0"
-            elif grep -q '\[patch\]' <<< "$MSG"; then next="v$X.$Y.$(( ${Z:-0} + 1 ))"
-            else next="v$X.$((Y+1))"
-            fi
+            case "$TIPO" in
+              major) next="v$((X+1)).0" ;;
+              minor) next="v$X.$((Y+1))" ;;
+              patch) next="v$X.$Y.$(( ${Z:-0} + 1 ))" ;;
+            esac
           fi
+          if git rev-parse -q --verify "refs/tags/$next" >/dev/null; then
+            echo "::error::La versión $next ya existe. Usá el flujo 'Reemplazar versión' si querés pisarla."
+            exit 1
+          fi
+          sha=$(git rev-parse HEAD)
           subject=$(git log -1 --pretty=%s)
-          echo "Última: ${last:-ninguna} -> Nueva: $next"
-          git tag "$next"
-          git push origin "$next"
-          gh release create "$next" --title "$next" --notes "Deploy automático: $subject (commit ${GITHUB_SHA::7})"
-      - name: Adjuntar index.html y planilla al Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          next=$(git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+(\.[0-9]+)?$' | sort -V | tail -1)
+          echo "Última: ${last:-ninguna} -> Nueva: $next ($TIPO)"
           files="index.html"
           if curl -fsSL "$PLANILLA_URL" -o "$PLANILLA_NOMBRE" && head -c 2 "$PLANILLA_NOMBRE" | grep -q PK; then
             files="$files $PLANILLA_NOMBRE"
           else
             echo "::warning::No se pudo descargar la planilla publicada; el Release queda solo con index.html."
           fi
-          gh release upload "$next" $files --clobber
+          git tag "$next" "$sha"
+          git push origin "$next"
+          gh release create "$next" --title "$next" --verify-tag \
+            --notes "Deploy ($TIPO): $subject (commit ${sha::7})" $files
+          echo "## ✅ Release $next ($TIPO) creado" >> "$GITHUB_STEP_SUMMARY"
