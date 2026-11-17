@@ -16,6 +16,7 @@
   .vs-dlg .vs-rels{max-height:60vh;overflow:auto}
   .vs-dlg .vs-rel{border-top:1px solid #e5e7eb;padding:10px 0}.vs-dlg .vs-rel pre{white-space:pre-wrap;font:inherit;font-size:14px;color:#6b7280;margin:4px 0 0}
   .vs-dlg .vs-acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:14px}
+  @media print{.vs-ver,.vs-upd,.vs-dlg{display:none!important}}
   .vs-dlg .vs-acts .vs-pri{background:#4f46e5;border-color:#4f46e5;color:#fff}
 </style>
 <div class="vs-upd" id="vsUpd" role="status"><span id="vsUpdTxt">Hay una versión nueva, recargá.</span><button type="button" id="vsUpdBtn">Recargar</button></div>
@@ -23,6 +24,7 @@
 <script>
 (function(){
   const REPO = "__REPO__";                       // usuario/repo de GitHub
+  const LOG_FN = "__LOG_FN__";                   // función propia de Changelog de la app (vacío = usar el de GitHub)
   const KEY  = "vs_rels_" + REPO;
   const APP_VERSION = (document.querySelector('meta[name="app-version"]')||{}).content || "v—";
   const $ = id => document.getElementById(id);
@@ -66,7 +68,7 @@
                     : rels ? "Esta versión todavía no figura en las Releases de GitHub." : "Fecha no disponible (requiere conexión).";
     const d = dlg(`<h3>Versión ${esc(APP_VERSION)}</h3><p class="vs-mut">${fecha}</p>${n?`<p><b>Hay una versión nueva: ${esc(ultima().tag)}.</b></p>`:""}
       <div class="vs-acts">${n?'<button class="vs-pri" id="vsRec" type="button">↻ Recargar</button>':""}<button ${n?"":'class="vs-pri"'} id="vsLog" type="button">📋 Changelog</button><button data-x type="button">Cerrar</button></div>`);
-    d.querySelector("#vsLog").onclick = openLog;
+    d.querySelector("#vsLog").onclick = () => { if(LOG_FN && typeof window[LOG_FN]==="function"){ d.close(); window[LOG_FN](); } else openLog(); };
     const rb = d.querySelector("#vsRec"); if(rb) rb.onclick = recargar;
   }
   function openLog(){

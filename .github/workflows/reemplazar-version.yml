@@ -24,7 +24,7 @@ on:
       adjuntos:
         description: "Archivos del repo a adjuntar, separados por espacio (vacío = ninguno)"
         required: false
-        default: index.html
+        default: "index.html"
         type: string
       incluir_planilla:
         description: "Adjuntar la planilla publicada (versión actual descargada de Google)"
@@ -38,11 +38,13 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 env:
   # Planilla publicada en la web como .xlsx (Todo el documento).
   PLANILLA_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQAUKQa5J2Kk6wjjUZt6-89UwQTfK46XPDwMr3oN8risYYIQYTe57D3-aPf5rzuxhWBcOpNKj3zbCv3/pub?output=xlsx"
   PLANILLA_NOMBRE: "Mi_Panel_planilla.xlsx"
+  DISPARAR_FLUJO: ""
 
 concurrency:
   group: release
@@ -120,3 +122,4 @@ jobs:
           git push origin "$V"
           gh release create "$V" --title "$V" --notes "$NOTAS" --verify-tag $ADJ
           echo "Listo: $V apunta a ${sha::7}."
+          if [ -n "$DISPARAR_FLUJO" ]; then gh workflow run "$DISPARAR_FLUJO" --ref "${{ inputs.rama }}"; fi

@@ -20,7 +20,8 @@ El tipo se indica en el mensaje del commit: `[major]`, `[minor]`, `[patch]` o `[
 1. **Número escrito en el HTML**: `<meta name="app-version" content="vX.Y.Z">` en el `<head>`.
    Antes de cada entrega se leen los tags del repo, se calcula el mismo número que calculará
    el flujo y se escribe ahí. Se ve sin conexión, en Apps Script y con copias viejas en caché.
-   El flujo `release.yml` avisa si el número del HTML no coincide con la Release creada.
+   El flujo `release.yml` avisa si el número del HTML no coincide con la Release creada, y si el del HTML
+   es más alto que el calculado usa el del HTML (útil para la primera Release de una app con numeración propia).
 2. **Fecha y Changelog desde GitHub**: al tocar el número, la app consulta las Releases
    (`api.github.com/repos/<usuario>/<repo>/releases`) y muestra la fecha del archivo más
    reciente de esa versión y el Changelog. Sin conexión usa la última copia guardada (localStorage).
@@ -30,10 +31,12 @@ El tipo se indica en el mensaje del commit: `[major]`, `[minor]`, `[patch]` o `[
 ## Plantillas (carpeta `plantilla/`)
 
 - `release.yml` y `reemplazar-version.yml`: flujos genéricos. Reemplazar `__APP_FILE__`, `__ADJUNTOS__`,
-  `__PLANILLA_URL__` (vacío si no hay planilla), `__PLANILLA_NOMBRE__` y `__CON_PLANILLA__` (true/false),
+  `__PLANILLA_URL__` (vacío si no hay planilla), `__PLANILLA_NOMBRE__` `__CON_PLANILLA__` (true/false) y `__DISPARAR_FLUJO__` (flujo de publicación a lanzar
+  tras la Release, ej. `pages.yml`, si Pages se publica solo al crear Releases; vacío = ninguno),
   y copiarlos a `.github/workflows/`.
 - `version-bloque.html`: bloque autónomo (estilos + aviso + diálogo + script). Se pega antes de `</body>`,
-  cambiando `__REPO__`; en el encabezado va `<button id="verBtn" class="vs-ver" type="button">v—</button>`.
+  cambiando `__REPO__` y `__LOG_FN__` (nombre de la función de Changelog propia de la app, o vacío para
+  usar el de GitHub); en el encabezado va `<button id="verBtn" class="vs-ver" type="button">v—</button>`.
 
 ## Implementación de referencia
 
