@@ -10,6 +10,7 @@ flowchart LR
         ABM["ABM Registros<br/><small>Prototipo</small>"]
         PANEL["Mi Panel<br/>Portal de apps y accesos<br/><small>Prototipo</small>"]
         SOFTRL["Softr.io Apps Launcher<br/><small>Idea</small>"]
+        SUPER["Super (Góndola)<br/>Comparador de precios<br/><small>Prototipo</small>"]
     end
 
     subgraph EXT["Servicios externos"]
@@ -20,6 +21,7 @@ flowchart LR
 
     ABM --> GS
     PANEL --> GS
+    SUPER --> GS
     SOFTRL --> SOFTR
 
     classDef enuso fill:#c8e6c9,stroke:#2e7d32,color:#1b1b1b
@@ -28,7 +30,7 @@ flowchart LR
     classDef servicio fill:#cfe3ff,stroke:#1e5aa8,color:#1b1b1b
 
     class CV,CIF,REC enuso
-    class ABM,PANEL prototipo
+    class ABM,PANEL,SUPER prototipo
     class SOFTRL idea
     class GS,SOFTR servicio
 ```
@@ -43,3 +45,4 @@ flowchart LR
 | ABM Registros | Prototipo | Google Sheets | [abm](https://github.com/luchorcompartidos/abm) |
 | Mi Panel (Portal de apps y accesos) | Prototipo | Google Sheets | [home](https://github.com/luchorcompartidos/home) |
 | Softr.io Apps Launcher | Idea | Softr.io | [softrapps](https://github.com/luchorcompartidos/softrapps) |
+| Super (Góndola) | Prototipo | Google Sheets | [super](https://github.com/luchorcompartidos/super) |
