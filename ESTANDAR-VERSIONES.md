@@ -38,6 +38,10 @@ El tipo se indica en el mensaje del commit: `[major]`, `[minor]`, `[patch]` o `[
   cambiando `__REPO__` y `__LOG_FN__` (nombre de la función de Changelog propia de la app, o vacío para
   usar el de GitHub); en el encabezado va `<button id="verBtn" class="vs-ver" type="button">v—</button>`.
 
+- Si la app ya muestra su propio texto de versión, marcar ese elemento con `data-vs-open` (abre el diálogo sin
+  cambiarle el texto). Dentro de Apps Script el aviso pide actualizar el script en lugar de recargar.
+- CompareIt: después de cambiar `index.html` hay que regenerar `apps-script/App.gs` (esquema + copia del HTML en base64).
+
 ## Implementación de referencia
 
 `index.html` de este repo (Mi Panel), bloque `Versión (estándar caja de apps)`,

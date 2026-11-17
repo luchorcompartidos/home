@@ -1,12 +1,15 @@
 <!-- ===== Versión (estándar caja de apps) — bloque autónomo =====
      Requiere en el <head>: <meta name="app-version" content="vX.Y.Z">
      y en el encabezado: <button id="verBtn" class="vs-ver" type="button">v—</button>
+     (o, si la app ya muestra su propio texto de versión, marcar ese elemento con data-vs-open:
+      al tocarlo abre el diálogo y no se le cambia el texto).
      1) El número escrito en el HTML se ve siempre (sin conexión, Apps Script, caché vieja).
      2) Fecha y Changelog desde las Releases de GitHub (sin conexión: última copia guardada).
      3) Si GitHub tiene una versión más alta: aviso "Hay una versión nueva, recargá". -->
 <style>
   .vs-ver{border:1px solid #d0d5dd;background:#fff;color:#555;font:600 12px system-ui,sans-serif;padding:3px 10px;border-radius:999px;cursor:pointer;vertical-align:middle}
-  .vs-ver.new{border-color:#d97706;color:#d97706}
+  .vs-ver.new,[data-vs-open].new{border-color:#d97706;color:#d97706}
+  [data-vs-open]{cursor:pointer}
   .vs-upd{display:none;position:sticky;top:0;z-index:9998;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;background:#f59e0b;color:#1c1f26;font:14px system-ui,sans-serif}
   .vs-upd.on{display:flex}
   .vs-upd button,.vs-dlg .vs-acts button,.vs-dlg .vs-acts a{border:1px solid #c9ced6;border-radius:10px;padding:8px 13px;background:#fff;color:#1c1f26;font:14px system-ui,sans-serif;cursor:pointer;text-decoration:none}
@@ -36,13 +39,19 @@
   // Si el diálogo quedó fuera del <body> (bloque pegado al final), lo movemos
   [$("vsUpd"),$("vsDlg")].forEach(el=>{ if(el && el.parentNode!==document.body) document.body.appendChild(el); });
   document.body.insertBefore($("vsUpd"), document.body.firstChild);
+  // Dentro de Apps Script la app sale de la copia del script: recargar no alcanza, hay que actualizarlo.
+  const GAS = !!(window.google && window.google.script && window.google.script.run);
+  const REL_URL = `https://github.com/${REPO}/releases`;
+  if(GAS){ const ub=$("vsUpdBtn"); ub.textContent = "Ver Releases"; }
   const ultima = () => rels && rels[0];
   const hayNueva = () => !!(ultima() && APP_VERSION!=="v—" && cmpV(ultima().tag, APP_VERSION) < 0);
   function show(){
     const b = $("verBtn"), n = hayNueva();
     if(b){ b.textContent = APP_VERSION + (n?" ⬆":""); b.classList.toggle("new", n); b.title = n ? "Hay una versión nueva: "+ultima().tag : "Versión"; }
+    document.querySelectorAll("[data-vs-open]").forEach(el=>{ el.classList.toggle("new", n); if(n) el.title = "Hay una versión nueva: "+ultima().tag; });
     $("vsUpd").classList.toggle("on", n);
-    if(n) $("vsUpdTxt").textContent = `Hay una versión nueva (${ultima().tag}), recargá.`;
+    if(n) $("vsUpdTxt").textContent = GAS ? `Hay una versión nueva (${ultima().tag}): actualizá el script de Apps Script.`
+                                          : `Hay una versión nueva (${ultima().tag}), recargá.`;
   }
   async function load(){
     try{
@@ -56,7 +65,7 @@
       show();
     }catch(e){}
   }
-  function recargar(){ const u = new URL(location.href); u.searchParams.set("v", Date.now()); location.replace(u); }
+  function recargar(){ if(GAS){ window.open(REL_URL, "_blank", "noopener"); return; } const u = new URL(location.href); u.searchParams.set("v", Date.now()); location.replace(u); }
   function dlg(html){
     const d = $("vsDlg"); d.innerHTML = html;
     d.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>d.close());
@@ -66,18 +75,20 @@
     const r = (rels||[]).find(x=>x.tag===APP_VERSION), n = hayNueva();
     const fecha = r ? (r.deArchivo?"Archivos actualizados el ":"Publicada el ")+"<b>"+fmt(r.date)+"</b>"
                     : rels ? "Esta versión todavía no figura en las Releases de GitHub." : "Fecha no disponible (requiere conexión).";
-    const d = dlg(`<h3>Versión ${esc(APP_VERSION)}</h3><p class="vs-mut">${fecha}</p>${n?`<p><b>Hay una versión nueva: ${esc(ultima().tag)}.</b></p>`:""}
-      <div class="vs-acts">${n?'<button class="vs-pri" id="vsRec" type="button">↻ Recargar</button>':""}<button ${n?"":'class="vs-pri"'} id="vsLog" type="button">📋 Changelog</button><button data-x type="button">Cerrar</button></div>`);
+    const d = dlg(`<h3>Versión ${esc(APP_VERSION)}</h3><p class="vs-mut">${fecha}</p>${n?`<p><b>Hay una versión nueva: ${esc(ultima().tag)}.</b>${GAS?" Para usarla, actualizá el script de Apps Script.":""}</p>`:""}
+      <div class="vs-acts">${n?`<button class="vs-pri" id="vsRec" type="button">${GAS?"Ver Releases":"↻ Recargar"}</button>`:""}<button ${n?"":'class="vs-pri"'} id="vsLog" type="button">📋 Changelog</button><button data-x type="button">Cerrar</button></div>`);
     d.querySelector("#vsLog").onclick = () => { if(LOG_FN && typeof window[LOG_FN]==="function"){ d.close(); window[LOG_FN](); } else openLog(); };
     const rb = d.querySelector("#vsRec"); if(rb) rb.onclick = recargar;
   }
   function openLog(){
     const list = (rels||[]).map(r=>`<div class="vs-rel"><b>${esc(r.tag)}</b>${r.tag===APP_VERSION?' <span class="vs-mut">(la que estás usando)</span>':""} · <span class="vs-mut">${fmt(r.date)}</span>${r.body?`<pre>${esc(r.body)}</pre>`:""}</div>`).join("");
     dlg(`<h3>Changelog</h3><div class="vs-rels">${list||'<p class="vs-mut">Sin datos todavía (requiere conexión).</p>'}</div>
-      <div class="vs-acts"><a href="https://github.com/${REPO}/releases" target="_blank" rel="noopener">Ver Releases en GitHub ↗</a><button data-x type="button">Cerrar</button></div>`);
+      <div class="vs-acts"><a href="${REL_URL}" target="_blank" rel="noopener">Ver Releases en GitHub ↗</a><button data-x type="button">Cerrar</button></div>`);
   }
   $("vsDlg").addEventListener("click", e=>{ if(e.target.id==="vsDlg") e.target.close(); });
   if($("verBtn")) $("verBtn").addEventListener("click", openVer);
+  document.querySelectorAll("[data-vs-open]").forEach(el=>el.addEventListener("click", openVer));
+  window.VS = { abrir: openVer, version: APP_VERSION, hayNueva };
   $("vsUpdBtn").addEventListener("click", recargar);
   show(); load();
 })();
