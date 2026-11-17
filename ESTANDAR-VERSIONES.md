@@ -1,7 +1,10 @@
 # Estándar de versiones — caja de apps
 
 Aplica a todas las apps (CVAPP, Cifrados PRO, ABM, Mi Panel, Softr.io Apps Launcher, CompareIt).
-Única excepción: Recordatorios (APK), donde el número ya va compilado en la app.
+Única excepción: Recordatorios (APK), donde el número ya va compilado en la app (versionName).
+Ahí se suma la misma lógica en Kotlin (`Version.kt`): Changelog y aviso de versión nueva leyendo las
+Releases, con link para descargar el instalador (.apk adjunto). Su flujo es `compilar.yml`; sin etiqueta
+compila de prueba (APK en Artifacts) en lugar de solo avisar.
 
 ## Numeración (SemVer, siempre tres números)
 
