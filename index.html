@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="app-version" content="v0.2.3">
+<meta name="app-version" content="v0.2.4">
 <title>Mi Panel</title>
 <style>
   :root{
@@ -125,6 +125,8 @@ const norm = s => (s ?? "").trim().toLowerCase().normalize("NFD").replace(/[̀-�
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const okColor = v => !!v && CSS.supports("color", v) ? v : "";
 const isUrl = v => /^https?:\/\//i.test(v);
+/* "github-apk:usuario/repo" en la columna URL = link al .apk de la última Release de ese repo */
+const apkRepo = v => (/^github-apk:\s*([\w.-]+\/[\w.-]+)\s*$/i.exec(v||"")||[])[1] || "";
 
 function parseCSV(t){
   const rows=[]; let row=[], cur="", q=false;
@@ -156,11 +158,12 @@ function table(csv){
 /* ---------- pestaña Accesos ---------- */
 function toItems(csv){
   return table(csv).map(r=>({
-    nombre:r.nombre||"", desc:r.descripcion||"", url:r.url||"",
+    nombre:r.nombre||"", desc:r.descripcion||"", url:r.url||"", apk:apkRepo(r.url),
     cat:r.categoria||"General", ico:r.icono||"🔗",
     activo:/^(si|sí|true|1|x|yes)$/i.test(r.activo||""),
     orden:parseFloat(r.orden)
-  })).filter(x=>x.activo && x.nombre && isUrl(x.url))
+  })).map(x=>x.apk ? {...x, url:`https://github.com/${x.apk}/releases/latest`} : x)
+    .filter(x=>x.activo && x.nombre && isUrl(x.url))
     .map(x=>({...x, orden:isNaN(x.orden)?9999:x.orden}))
     .sort((a,b)=>a.orden-b.orden);
 }
@@ -220,7 +223,7 @@ function render(){
       <div class="grid">${list.filter(i=>i.cat===c).map(i=>`
         <a class="card" href="${esc(i.url)}" target="_blank" rel="noopener noreferrer">
           <div class="ico">${icon(i.ico)}</div>
-          <div><p class="name">${esc(i.nombre)}</p><p class="desc">${esc(i.desc)}</p><span class="tag">${esc(tipo(i.url))}</span></div>
+          <div><p class="name">${esc(i.nombre)}</p><p class="desc">${esc(i.desc)}</p><span class="tag">${esc(i.etiqueta || tipo(i.url))}</span></div>
         </a>`).join("")}</div>
     </section>`).join("");
 }
@@ -233,6 +236,31 @@ function applyConfig(){
   const acc = okColor(p["color principal"]);
   if(acc) document.documentElement.style.setProperty("--accent", acc);
   else document.documentElement.style.removeProperty("--accent");
+}
+
+/* ---------- instaladores APK (última Release de GitHub) ---------- */
+const APK_KEY = "mipanel_apk_v1", APK_MIN = 10;
+async function ultimaApk(repo){
+  let c={}; try{ c=JSON.parse(localStorage.getItem(APK_KEY)||"{}") }catch{}
+  if(c[repo] && Date.now()-c[repo].t < APK_MIN*60000) return c[repo];
+  try{
+    const r = await fetch(`https://api.github.com/repos/${repo}/releases/latest`,{headers:{Accept:"application/vnd.github+json"},cache:"no-store"});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const j = await r.json(), a = (j.assets||[]).find(x=>/\.apk$/i.test(x.name));
+    if(!a) throw new Error("sin .apk");
+    c[repo] = { t:Date.now(), url:a.browser_download_url, ver:j.tag_name };
+    try{ localStorage.setItem(APK_KEY, JSON.stringify(c)) }catch{}
+    return c[repo];
+  }catch(e){ return c[repo] || null; }   // sin conexión: última conocida, o queda el link a la página de Releases
+}
+async function resolverApks(){
+  const lista = items.filter(i=>i.apk);
+  if(!lista.length) return;
+  await Promise.all(lista.map(async i=>{
+    const d = await ultimaApk(i.apk);
+    if(d){ i.url = d.url; i.etiqueta = "Descargar " + d.ver; } else i.etiqueta = "Ver versiones";
+  }));
+  render();
 }
 
 /* ---------- lectura de la hoja ---------- */
@@ -286,7 +314,7 @@ async function load(force=false){
   }
 
   cfg = toConfig(conf); items = toItems(acc);
-  applyConfig(); render();
+  applyConfig(); render(); resolverApks();
   $("#foot").textContent = [nota, t ? "Actualizado: " + fmt(t) : ""].filter(Boolean).join(" · ");
   setBusy(false);
 }
