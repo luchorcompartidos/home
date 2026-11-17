@@ -1,0 +1,34 @@
+# Estándar de versiones — caja de apps
+
+Aplica a todas las apps (CVAPP, Cifrados PRO, ABM, Mi Panel, Softr.io Apps Launcher, CompareIt).
+Única excepción: Recordatorios (APK), donde el número ya va compilado en la app.
+
+## Numeración (SemVer, siempre tres números)
+
+| Tipo  | Ejemplo           | Cuándo                                   |
+|-------|-------------------|------------------------------------------|
+| Major | v0.9.2 → v1.0.0   | Cambios que rompen o rediseños           |
+| Minor | v0.3.1 → v0.4.0   | Funcionalidad nueva compatible           |
+| Patch | v0.3.0 → v0.3.1   | Correcciones y ajustes chicos            |
+| Sin release | —           | El push publica pero no crea tag ni Release |
+
+Las versiones viejas de dos números (v0.1, v0.2) quedan como están; el orden se calcula bien.
+El tipo se indica en el mensaje del commit: `[major]`, `[minor]`, `[patch]` o `[skip release]`.
+
+## Las tres piezas
+
+1. **Número escrito en el HTML**: `<meta name="app-version" content="vX.Y.Z">` en el `<head>`.
+   Antes de cada entrega se leen los tags del repo, se calcula el mismo número que calculará
+   el flujo y se escribe ahí. Se ve sin conexión, en Apps Script y con copias viejas en caché.
+   El flujo `release.yml` avisa si el número del HTML no coincide con la Release creada.
+2. **Fecha y Changelog desde GitHub**: al tocar el número, la app consulta las Releases
+   (`api.github.com/repos/<usuario>/<repo>/releases`) y muestra la fecha del archivo más
+   reciente de esa versión y el Changelog. Sin conexión usa la última copia guardada (localStorage).
+3. **Aviso de versión nueva**: si GitHub tiene una versión más alta que la del archivo,
+   se muestra "Hay una versión nueva (vX.Y.Z), recargá" con botón Recargar.
+
+## Implementación de referencia
+
+`index.html` de este repo (Mi Panel), bloque `Versión (estándar caja de apps)`,
+y `.github/workflows/release.yml` (cálculo de versión y control del número en el HTML).
+Para otra app: copiar el bloque, cambiar `REPO`, `RELS_KEY` y `APP_FILE`.

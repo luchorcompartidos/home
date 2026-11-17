@@ -1,9 +1,12 @@
 name: Tag y Release automáticos
 
-# Tipo de Release según el mensaje del commit (push a main):
-#   "[major]"  v0.9   -> v1.0
-#   "[minor]"  v0.3   -> v0.4
-#   "[patch]"  v0.3   -> v0.3.1 -> v0.3.2 (el siguiente minor pasa a v0.4)
+# Tipo de Release según el mensaje del commit (push a main). Siempre tres números (SemVer):
+#   "[major]"  v0.9.2 -> v1.0.0
+#   "[minor]"  v0.3.1 -> v0.4.0
+#   "[patch]"  v0.3.0 -> v0.3.1 -> v0.3.2 (las versiones viejas v0.1, v0.2 se ordenan igual)
+# Estándar de versión: el número va escrito en el HTML
+#   <meta name="app-version" content="vX.Y.Z">
+# Este flujo compara ese número con el que calcula y avisa si no coinciden.
 #   sin etiqueta (o "[skip release]"): NO crea tag ni Release; deja un aviso
 #   en la corrida con el link para crearlo a mano si se quiere.
 # Creación a mano: Actions > "Tag y Release automáticos" > Run workflow > elegir tipo.
@@ -82,21 +85,29 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TIPO: ${{ steps.tipo.outputs.tipo }}
+          APP_FILE: index.html
         run: |
           last=$(git tag -l 'v*' | grep -E '^v[0-9]+\.[0-9]+(\.[0-9]+)?$' | sort -V | tail -1)
           if [ -z "$last" ]; then
-            next="v0.1"
+            next="v0.1.0"
           else
             IFS=. read -r X Y Z <<< "${last#v}"
             case "$TIPO" in
-              major) next="v$((X+1)).0" ;;
-              minor) next="v$X.$((Y+1))" ;;
+              major) next="v$((X+1)).0.0" ;;
+              minor) next="v$X.$((Y+1)).0" ;;
               patch) next="v$X.$Y.$(( ${Z:-0} + 1 ))" ;;
             esac
           fi
           if git rev-parse -q --verify "refs/tags/$next" >/dev/null; then
             echo "::error::La versión $next ya existe. Usá el flujo 'Reemplazar versión' si querés pisarla."
             exit 1
+          fi
+          enhtml=$(grep -oE '<meta name="app-version" content="v[0-9.]+"' "$APP_FILE" | grep -oE 'v[0-9.]+' || true)
+          if [ -z "$enhtml" ]; then
+            echo "::warning title=Versión en el HTML::$APP_FILE no tiene <meta name=\"app-version\">. El encabezado no va a mostrar el número sin conexión."
+          elif [ "$enhtml" != "$next" ]; then
+            echo "::warning title=Versión en el HTML::$APP_FILE dice $enhtml pero esta Release es $next. La app va a mostrar el aviso de versión nueva."
+            echo "> ⚠️ El HTML dice **$enhtml** y la Release es **$next**." >> "$GITHUB_STEP_SUMMARY"
           fi
           sha=$(git rev-parse HEAD)
           subject=$(git log -1 --pretty=%s)

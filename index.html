@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="app-version" content="v0.2.3">
 <title>Mi Panel</title>
 <style>
   :root{
@@ -58,6 +59,10 @@
   .acts a,.acts button{text-decoration:none;padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:14px;cursor:pointer}
   .acts .pri{background:var(--accent);border-color:var(--accent);color:#fff}
   .muted{color:var(--muted)}
+  .ver.new{border-color:#d97706;color:#d97706}
+  .upd{display:none;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 0;padding:10px 14px;border:1px solid #d97706;border-radius:12px;background:color-mix(in srgb,#d97706 12%,var(--card));font-size:14px}
+  .upd.on{display:flex}
+  .upd button{padding:7px 12px;border-radius:10px;border:1px solid #d97706;background:#d97706;color:#fff;font-size:14px;cursor:pointer}
   footer{margin-top:40px;text-align:center;color:var(--muted);font-size:12px}
 </style>
 </head>
@@ -73,6 +78,7 @@
       <button class="btn" id="refresh" type="button" title="Leer la hoja ahora, sin usar la copia guardada"><span class="spin">↻</span><span id="refreshTxt">Actualizar</span></button>
     </div>
   </header>
+  <div class="upd" id="upd" role="status"><span id="updTxt">Hay una versión nueva, recargá.</span><button type="button" id="updBtn">Recargar</button></div>
   <dialog id="dlg"></dialog>
   <div class="chips" id="chips"></div>
   <main id="app"><p class="status">Cargando…</p></main>
@@ -288,19 +294,32 @@ async function load(force=false){
 $("#chips").addEventListener("click", e=>{ const b=e.target.closest(".chip"); if(b){ cat=b.dataset.c; render(); } });
 $("#q").addEventListener("input", e=>{ term=e.target.value; render(); });
 $("#refresh").addEventListener("click", ()=>load(true));
-/* ---------- Versión y Changelog (desde las Releases de GitHub) ----------
-   Muestra la versión más alta publicada. La fecha es la del archivo más reciente
-   adjunto a esa Release (si no tiene adjuntos, la de publicación).                */
+/* ---------- Versión (estándar caja de apps) ----------
+   1) El número está escrito en el HTML: <meta name="app-version">. Se ve siempre,
+      sin conexión, en Apps Script y aunque el navegador tenga una copia vieja.
+   2) Fecha y Changelog se leen de las Releases de GitHub (sin conexión: última copia guardada).
+      La fecha es la del archivo más reciente adjunto a esa Release (si no hay, la de publicación).
+   3) Si GitHub tiene una versión más alta que la del archivo: aviso "Hay una versión nueva, recargá". */
 const REPO = "luchorcompartidos/home";
+const APP_VERSION = (document.querySelector('meta[name="app-version"]')||{}).content || "v—";
 const RELS_KEY = "panel_rels";
 let rels = null; try{ rels = JSON.parse(localStorage.getItem(RELS_KEY)||"null") }catch{}
 const fmtDT = s => new Date(s).toLocaleString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
 const semv = t => (t.replace(/^v/,"").split(".").map(n=>parseInt(n)||0).concat([0,0,0])).slice(0,3);
 const cmpV = (a,b) => { const x=semv(a), y=semv(b); for(let i=0;i<3;i++) if(x[i]!==y[i]) return y[i]-x[i]; return 0; };
-function showVer(){ $("#verBtn").textContent = rels && rels[0] ? rels[0].tag : "v—"; }
+const ultima = () => rels && rels[0];
+const hayNueva = () => !!(ultima() && APP_VERSION !== "v—" && cmpV(ultima().tag, APP_VERSION) < 0);
+function showVer(){
+  const b = $("#verBtn"), n = hayNueva();
+  b.textContent = APP_VERSION + (n ? " ⬆" : "");
+  b.classList.toggle("new", n);
+  b.title = n ? "Hay una versión nueva: " + ultima().tag : "Versión";
+  $("#upd").classList.toggle("on", n);
+  if(n) $("#updTxt").textContent = `Hay una versión nueva (${ultima().tag}), recargá.`;
+}
 async function loadRels(){
   try{
-    const r = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=100`,{headers:{Accept:"application/vnd.github+json"}});
+    const r = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=100`,{headers:{Accept:"application/vnd.github+json"},cache:"no-store"});
     if(!r.ok) return;
     rels = (await r.json()).filter(x=>!x.draft && !x.prerelease).map(x=>{
       const fechas = (x.assets||[]).map(a=>a.updated_at).filter(Boolean).sort();
@@ -311,6 +330,7 @@ async function loadRels(){
     showVer();
   }catch{}
 }
+function recargar(){ const u = new URL(location.href); u.searchParams.set("v", Date.now()); location.replace(u); }
 function dialog(html){
   const d = $("#dlg"); d.innerHTML = html;
   d.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>d.close());
@@ -318,20 +338,23 @@ function dialog(html){
   return d;
 }
 function openVer(){
-  const r = rels && rels[0];
-  const d = dialog(`<h3>Versión ${esc(r ? r.tag : "desconocida")}</h3>
-    <p class="muted">${r ? (r.deArchivo ? "Archivos actualizados el " : "Publicada el ") + "<b>" + fmtDT(r.date) + "</b>"
-                        : "Todavía no se pudo consultar la versión (requiere conexión)."}</p>
-    <div class="acts"><button class="pri" id="vLog" type="button">📋 Changelog</button><button data-x type="button">Cerrar</button></div>`);
+  const r = (rels||[]).find(x=>x.tag===APP_VERSION);
+  const fecha = r ? (r.deArchivo ? "Archivos actualizados el " : "Publicada el ") + "<b>" + fmtDT(r.date) + "</b>"
+                  : rels ? "Esta versión todavía no figura en las Releases de GitHub." : "Fecha no disponible (requiere conexión).";
+  const nueva = hayNueva() ? `<p><b>Hay una versión nueva: ${esc(ultima().tag)}.</b></p>` : "";
+  const d = dialog(`<h3>Versión ${esc(APP_VERSION)}</h3><p class="muted">${fecha}</p>${nueva}
+    <div class="acts">${hayNueva()?'<button class="pri" id="vRec" type="button">↻ Recargar</button>':""}<button ${hayNueva()?"":'class="pri"'} id="vLog" type="button">📋 Changelog</button><button data-x type="button">Cerrar</button></div>`);
   d.querySelector("#vLog").onclick = openLog;
+  const rb = d.querySelector("#vRec"); if(rb) rb.onclick = recargar;
 }
 function openLog(){
-  const list = (rels||[]).map(r=>`<div class="rel"><b>${esc(r.tag)}</b> · <span class="muted">${fmtDT(r.date)}</span>${r.body?`<pre>${esc(r.body)}</pre>`:""}</div>`).join("");
+  const list = (rels||[]).map(r=>`<div class="rel"><b>${esc(r.tag)}</b>${r.tag===APP_VERSION?' <span class="muted">(la que estás usando)</span>':""} · <span class="muted">${fmtDT(r.date)}</span>${r.body?`<pre>${esc(r.body)}</pre>`:""}</div>`).join("");
   dialog(`<h3>Changelog</h3><div class="rels">${list || '<p class="muted">Sin datos todavía (requiere conexión).</p>'}</div>
     <div class="acts"><a href="https://github.com/${REPO}/releases" target="_blank" rel="noopener">Ver Releases en GitHub ↗</a><button data-x type="button">Cerrar</button></div>`);
 }
 $("#dlg").addEventListener("click", e=>{ if(e.target.id==="dlg") e.target.close(); });
 $("#verBtn").addEventListener("click", openVer);
+$("#updBtn").addEventListener("click", recargar);
 showVer(); loadRels();
 
 load();

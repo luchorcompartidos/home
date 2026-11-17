@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Versión a reemplazar o crear (ej. v0.1)"
+        description: "Versión a reemplazar o crear (ej. v0.3.0)"
         required: true
         type: string
       confirmar:
@@ -62,7 +62,7 @@ jobs:
             exit 1
           fi
           if ! grep -Eq '^v[0-9]+\.[0-9]+(\.[0-9]+)?$' <<< "$V"; then
-            echo "::error::Formato de versión inválido: '$V'. Usá vX.Y o vX.Y.Z (ej. v0.1)."
+            echo "::error::Formato de versión inválido: '$V'. Usá vX.Y.Z (ej. v0.3.0); se aceptan también las viejas vX.Y."
             exit 1
           fi
 
