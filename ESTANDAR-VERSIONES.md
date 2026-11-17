@@ -27,6 +27,14 @@ El tipo se indica en el mensaje del commit: `[major]`, `[minor]`, `[patch]` o `[
 3. **Aviso de versión nueva**: si GitHub tiene una versión más alta que la del archivo,
    se muestra "Hay una versión nueva (vX.Y.Z), recargá" con botón Recargar.
 
+## Plantillas (carpeta `plantilla/`)
+
+- `release.yml` y `reemplazar-version.yml`: flujos genéricos. Reemplazar `__APP_FILE__`, `__ADJUNTOS__`,
+  `__PLANILLA_URL__` (vacío si no hay planilla), `__PLANILLA_NOMBRE__` y `__CON_PLANILLA__` (true/false),
+  y copiarlos a `.github/workflows/`.
+- `version-bloque.html`: bloque autónomo (estilos + aviso + diálogo + script). Se pega antes de `</body>`,
+  cambiando `__REPO__`; en el encabezado va `<button id="verBtn" class="vs-ver" type="button">v—</button>`.
+
 ## Implementación de referencia
 
 `index.html` de este repo (Mi Panel), bloque `Versión (estándar caja de apps)`,
