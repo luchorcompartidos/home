@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="app-version" content="v0.2.5">
+<meta name="app-version" content="v0.2.6">
 <title>Mi Panel</title>
 <style>
   :root{
@@ -332,6 +332,9 @@ const REPO = "luchorcompartidos/home";
 const APP_VERSION = (document.querySelector('meta[name="app-version"]')||{}).content || "v—";
 const RELS_KEY = "panel_rels";
 let rels = null; try{ rels = JSON.parse(localStorage.getItem(RELS_KEY)||"null") }catch{}
+// Estado de la última consulta a GitHub: así el diálogo distingue "no está publicada" de "no se pudo consultar"
+let relsAt = 0; try{ relsAt = +localStorage.getItem(RELS_KEY+"_t") || 0 }catch{}
+let lastFail = false, loading = null, reintento = false;
 const fmtDT = s => new Date(s).toLocaleString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
 const semv = t => (t.replace(/^v/,"").split(".").map(n=>parseInt(n)||0).concat([0,0,0])).slice(0,3);
 const cmpV = (a,b) => { const x=semv(a), y=semv(b); for(let i=0;i<3;i++) if(x[i]!==y[i]) return y[i]-x[i]; return 0; };
@@ -345,10 +348,12 @@ function showVer(){
   $("#upd").classList.toggle("on", n);
   if(n) $("#updTxt").textContent = `Hay una versión nueva (${ultima().tag}), recargá.`;
 }
-async function loadRels(){
+function loadRels(){ if(!loading) loading = doLoadRels().finally(()=>{ loading = null }); return loading; }
+async function doLoadRels(){
   try{
     const r = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=100`,{headers:{Accept:"application/vnd.github+json"},cache:"no-store"});
-    if(!r.ok) return;
+    if(!r.ok){ lastFail = true; return; }
+    lastFail = false; relsAt = Date.now(); try{ localStorage.setItem(RELS_KEY+"_t", String(relsAt)) }catch{}
     rels = (await r.json()).filter(x=>!x.draft && !x.prerelease).map(x=>{
       const fechas = (x.assets||[]).map(a=>a.updated_at).filter(Boolean).sort();
       return { tag:x.tag_name, date:fechas.length ? fechas[fechas.length-1] : (x.published_at||x.created_at),
@@ -356,7 +361,7 @@ async function loadRels(){
     }).sort((a,b)=>cmpV(a.tag,b.tag));
     try{ localStorage.setItem(RELS_KEY, JSON.stringify(rels)) }catch{}
     showVer();
-  }catch{}
+  }catch{ lastFail = true; }
 }
 function recargar(){ const u = new URL(location.href); u.searchParams.set("v", Date.now()); location.replace(u); }
 function dialog(html){
@@ -367,8 +372,14 @@ function dialog(html){
 }
 function openVer(){
   const r = (rels||[]).find(x=>x.tag===APP_VERSION);
+  const hace = relsAt ? ` (información de hace ${Math.max(1, Math.round((Date.now()-relsAt)/60000))} min)` : "";
+  // Si la lista guardada no tiene esta versión, se vuelve a consultar GitHub antes de concluir nada
+  if(!r && !reintento && navigator.onLine !== false){ reintento = true; dialog(`<h3>Versión ${esc(APP_VERSION)}</h3><p class="muted">Consultando GitHub…</p>`); loadRels().then(()=>{ if($("#dlg").open) openVer(); reintento = false; }); return; }
   const fecha = r ? (r.deArchivo ? "Archivos actualizados el " : "Publicada el ") + "<b>" + fmtDT(r.date) + "</b>"
-                  : rels ? "Esta versión todavía no figura en las Releases de GitHub." : "Fecha no disponible (requiere conexión).";
+              : navigator.onLine === false ? `Sin conexión: no se puede consultar GitHub ahora${rels ? hace : ""}.`
+              : lastFail ? `No se pudo consultar GitHub (puede ser un límite de consultas seguidas). Probá de nuevo en unos minutos${rels ? hace : ""}.`
+              : rels ? "Esta versión todavía no figura en las Releases de GitHub. Se publica unos segundos después de cada entrega: probá de nuevo en un minuto."
+              : "Fecha no disponible (requiere conexión).";
   const nueva = hayNueva() ? `<p><b>Hay una versión nueva: ${esc(ultima().tag)}.</b></p>` : "";
   const d = dialog(`<h3>Versión ${esc(APP_VERSION)}</h3><p class="muted">${fecha}</p>${nueva}
     <div class="acts">${hayNueva()?'<button class="pri" id="vRec" type="button">↻ Recargar</button>':""}<button ${hayNueva()?"":'class="pri"'} id="vLog" type="button">📋 Changelog</button><button data-x type="button">Cerrar</button></div>`);
@@ -383,6 +394,9 @@ function openLog(){
 $("#dlg").addEventListener("click", e=>{ if(e.target.id==="dlg") e.target.close(); });
 $("#verBtn").addEventListener("click", openVer);
 $("#updBtn").addEventListener("click", recargar);
+// Se vuelve a consultar al volver a la app (si la información tiene más de 10 minutos) y al recuperar la conexión
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible" && Date.now()-relsAt > 600000) loadRels(); });
+window.addEventListener("online", ()=>loadRels());
 showVer(); loadRels();
 
 load();
