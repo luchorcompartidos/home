@@ -11,18 +11,24 @@ flowchart LR
         PANEL["Mi Panel<br/>Portal de apps y accesos<br/><small>Prototipo</small>"]
         SOFTRL["Softr.io Apps Launcher<br/><small>Idea</small>"]
         SUPER["Super (Góndola)<br/>Comparador de precios<br/><small>Prototipo</small>"]
+        JOB["Job Post ATS Analizer<br/>Avisos, CV y postulaciones<br/><small>Prototipo</small>"]
     end
 
     subgraph EXT["Servicios externos"]
         direction TB
         GS[("Google Sheets")]
         SOFTR(["Softr.io"])
+        GAS(["Google Apps Script"])
+        IA(["IA: Gemini / Claude"])
     end
 
     ABM --> GS
     PANEL --> GS
     SUPER --> GS
     SOFTRL --> SOFTR
+    JOB -. opcional .-> GAS
+    GAS --> IA
+    CV -. JSON .-> JOB
 
     classDef enuso fill:#c8e6c9,stroke:#2e7d32,color:#1b1b1b
     classDef prototipo fill:#fff3b0,stroke:#b38f00,color:#1b1b1b
@@ -30,9 +36,9 @@ flowchart LR
     classDef servicio fill:#cfe3ff,stroke:#1e5aa8,color:#1b1b1b
 
     class CV,CIF,REC enuso
-    class ABM,PANEL,SUPER prototipo
+    class ABM,PANEL,SUPER,JOB prototipo
     class SOFTRL idea
-    class GS,SOFTR servicio
+    class GS,SOFTR,GAS,IA servicio
 ```
 
 **Referencias:** verde = En uso · amarillo = Prototipo · gris = Idea · azul = servicio externo
@@ -46,3 +52,4 @@ flowchart LR
 | Mi Panel (Portal de apps y accesos) | Prototipo | Google Sheets | [home](https://github.com/luchorcompartidos/home) |
 | Softr.io Apps Launcher | Idea | Softr.io | [softrapps](https://github.com/luchorcompartidos/softrapps) |
 | Super (Góndola) | Prototipo | Google Sheets | [super](https://github.com/luchorcompartidos/super) |
+| Job Post ATS Analizer | Prototipo | IA opcional (Gemini o Claude, vía Apps Script); importa el JSON de CVAPP | [jobpost](https://github.com/luchorcompartidos/jobpost) |
