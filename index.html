@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="app-version" content="v0.2.7">
+<meta name="app-version" content="v0.2.9">
 <title>Mi Panel</title>
 <style>
   :root{
@@ -62,6 +62,8 @@
   .ver.new{border-color:#d97706;color:#d97706}
   .upd{display:none;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 0;padding:10px 14px;border:1px solid #d97706;border-radius:12px;background:color-mix(in srgb,#d97706 12%,var(--card));font-size:14px}
   .upd.on{display:flex}
+  .upd .bts{display:flex;gap:6px;flex:none}
+  .upd button.sec{background:transparent;color:inherit}
   .upd button{padding:7px 12px;border-radius:10px;border:1px solid #d97706;background:#d97706;color:#fff;font-size:14px;cursor:pointer}
   footer{margin-top:40px;text-align:center;color:var(--muted);font-size:12px}
 </style>
@@ -78,7 +80,7 @@
       <button class="btn" id="refresh" type="button" title="Leer la hoja ahora, sin usar la copia guardada"><span class="spin">↻</span><span id="refreshTxt">Actualizar</span></button>
     </div>
   </header>
-  <div class="upd" id="upd" role="status"><span id="updTxt">Hay una versión nueva, recargá.</span><button type="button" id="updBtn">Recargar</button></div>
+  <div class="upd" id="upd" role="status"><span id="updTxt">Hay una versión nueva, recargá.</span><span class="bts"><button type="button" id="updBtn">Recargar</button><button type="button" class="sec" id="updHide" title="Ocultar este aviso hasta que haya otra versión">Ocultar</button></span></div>
   <dialog id="dlg"></dialog>
   <div class="chips" id="chips"></div>
   <main id="app"><p class="status">Cargando…</p></main>
@@ -345,7 +347,8 @@ function showVer(){
   b.textContent = APP_VERSION + (n ? " ⬆" : "");
   b.classList.toggle("new", n);
   b.title = n ? "Hay una versión nueva: " + ultima().tag : "Versión";
-  $("#upd").classList.toggle("on", n);
+  let oculta = ""; try{ oculta = localStorage.getItem(RELS_KEY+"_oculta")||"" }catch{}
+  $("#upd").classList.toggle("on", n && oculta !== ultima().tag);
   if(n) $("#updTxt").textContent = `Hay una versión nueva (${ultima().tag}), recargá.`;
 }
 function loadRels(){ if(!loading) loading = doLoadRels().finally(()=>{ loading = null }); return loading; }
@@ -394,6 +397,7 @@ function openLog(){
 $("#dlg").addEventListener("click", e=>{ if(e.target.id==="dlg") e.target.close(); });
 $("#verBtn").addEventListener("click", openVer);
 $("#updBtn").addEventListener("click", recargar);
+$("#updHide").addEventListener("click", ()=>{ try{ localStorage.setItem(RELS_KEY+"_oculta", ultima() ? ultima().tag : "") }catch{} $("#upd").classList.remove("on"); });
 // Se vuelve a consultar al volver a la app (si la información tiene más de 10 minutos) y al recuperar la conexión
 document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible" && Date.now()-relsAt > 600000) loadRels(); });
 window.addEventListener("online", ()=>loadRels());

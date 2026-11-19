@@ -118,15 +118,29 @@ jobs:
             echo "El HTML dice $h, más alto que $next: se usa $h."
             next="$h"
           fi
+          desfase=""
           for f in $APP_FILE; do
             enhtml=$(grep -oE '<meta name="app-version" content="v[0-9.]+"' "$f" | grep -oE 'v[0-9.]+' || true)
             if [ -z "$enhtml" ]; then
               echo "::warning title=Versión en el HTML::$f no tiene <meta name=\"app-version\">. El encabezado no va a mostrar el número sin conexión."
             elif [ "$enhtml" != "$next" ]; then
-              echo "::warning title=Versión en el HTML::$f dice $enhtml pero esta Release es $next. La app va a mostrar el aviso de versión nueva."
-              echo "> ⚠️ $f dice **$enhtml** y la Release es **$next**." >> "$GITHUB_STEP_SUMMARY"
+              desfase="$desfase $f($enhtml)"
             fi
           done
+          # Si el HTML no dice el número de esta Release, NO se crea: la app mostraría
+          # para siempre el aviso de versión nueva sin poder actualizarse.
+          if [ -n "$desfase" ]; then
+            echo "::error title=Release no creada::El HTML no dice $next:$desfase. Si el cambio no toca la app, subilo sin etiqueta (sin Release). Si la toca, escribí $next en <meta name=\"app-version\"> y volvé a subir."
+            {
+              echo "## ⛔ Release $next no creada"
+              echo
+              echo "El número escrito en el HTML no coincide con la Release:$desfase."
+              echo
+              echo "- Si el cambio **no toca la app** (documentación, mapa, etc.), subilo **sin etiqueta**: se publica igual, sin Release."
+              echo "- Si **toca la app**, escribí **$next** en \`<meta name=\"app-version\">\` y volvé a subir con la etiqueta."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
           sha=$(git rev-parse HEAD)
           subject=$(git log -1 --pretty=%s)
           echo "Última: ${last:-ninguna} -> Nueva: $next ($TIPO)"
