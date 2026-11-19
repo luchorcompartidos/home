@@ -12,6 +12,7 @@ flowchart LR
         SOFTRL["Softr.io Apps Launcher<br/><small>Idea</small>"]
         SUPER["Super (Góndola)<br/>Comparador de precios<br/><small>Prototipo</small>"]
         JOB["Job Post ATS Analizer<br/>Avisos, CV y postulaciones<br/><small>Prototipo</small>"]
+        RND["Random<br/>Selecciones aleatorias con reglas y pesos<br/><small>Prototipo</small>"]
     end
 
     subgraph EXT["Servicios externos"]
@@ -36,7 +37,7 @@ flowchart LR
     classDef servicio fill:#cfe3ff,stroke:#1e5aa8,color:#1b1b1b
 
     class CV,CIF,REC enuso
-    class ABM,PANEL,SUPER,JOB prototipo
+    class ABM,PANEL,SUPER,JOB,RND prototipo
     class SOFTRL idea
     class GS,SOFTR,GAS,IA servicio
 ```
@@ -53,3 +54,4 @@ flowchart LR
 | Softr.io Apps Launcher | Idea | Softr.io | [softrapps](https://github.com/luchorcompartidos/softrapps) |
 | Super (Góndola) | Prototipo | Google Sheets | [super](https://github.com/luchorcompartidos/super) |
 | Job Post ATS Analizer | Prototipo | IA opcional (Gemini o Claude, vía Apps Script); importa el JSON de CVAPP | [jobpost](https://github.com/luchorcompartidos/jobpost) |
+| Random | Prototipo | — | [random](https://github.com/luchorcompartidos/random) |
