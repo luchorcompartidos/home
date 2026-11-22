@@ -40,7 +40,7 @@
 - Archivos principales: [index.html, app.js, …]
 - Configuración / servicios: [IDs, hojas, proyectos (sin claves ni contraseñas)]
 - Cómo se publica: [push a main → GitHub Pages / GitHub Actions compila APK / …]
-- Convención de Releases: [push normal = Minor · "[patch]" = Patch · "[major]" = Major · "[skip release]" = sin release]
+- Releases: según `ESTANDAR-VERSIONES.md` del repo home (`[major]` / `[minor]` / `[patch]` / `[skip release]` en el commit; cambios que no tocan la app van sin release)
 
 ## 7. Historial (resumido)
 - [vX.Y] [AAAA-MM-DD] — [qué cambió, una línea]
