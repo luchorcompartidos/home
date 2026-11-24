@@ -14,6 +14,7 @@ flowchart LR
         JOB["Job Post ATS Analizer<br/>Avisos, CV y postulaciones<br/><small>Prototipo</small>"]
         RND["Random<br/>Selecciones aleatorias con reglas y pesos<br/><small>Prototipo</small>"]
         FOTOS["FotosCompare<br/>Google Fotos vs. dispositivo: respaldos y duplicados<br/><small>Prototipo</small>"]
+        DISK["DiskCompare (Android APK)<br/>Uso del almacenamiento y comparación con la PC<br/><small>Prototipo</small>"]
     end
 
     subgraph EXT["Servicios externos"]
@@ -23,6 +24,7 @@ flowchart LR
         GAS(["Google Apps Script"])
         IA(["IA: Gemini / Claude"])
         GF(["Google Fotos (Takeout y Picker API)"])
+        WIN(["PC con Windows (carpeta compartida SMB)"])
     end
 
     ABM --> GS
@@ -33,6 +35,7 @@ flowchart LR
     GAS --> IA
     CV -. JSON .-> JOB
     FOTOS --> GF
+    DISK -. WiFi .-> WIN
 
     classDef enuso fill:#c8e6c9,stroke:#2e7d32,color:#1b1b1b
     classDef prototipo fill:#fff3b0,stroke:#b38f00,color:#1b1b1b
@@ -40,9 +43,9 @@ flowchart LR
     classDef servicio fill:#cfe3ff,stroke:#1e5aa8,color:#1b1b1b
 
     class CV,CIF,REC enuso
-    class ABM,PANEL,SUPER,JOB,RND,FOTOS prototipo
+    class ABM,PANEL,SUPER,JOB,RND,FOTOS,DISK prototipo
     class SOFTRL idea
-    class GS,SOFTR,GAS,IA,GF servicio
+    class GS,SOFTR,GAS,IA,GF,WIN servicio
 ```
 
 **Referencias:** verde = En uso · amarillo = Prototipo · gris = Idea · azul = servicio externo
@@ -59,3 +62,4 @@ flowchart LR
 | Job Post ATS Analizer | Prototipo | IA opcional (Gemini o Claude, vía Apps Script); importa el JSON de CVAPP | [jobpost](https://github.com/luchorcompartidos/jobpost) |
 | Random | Prototipo | — | [random](https://github.com/luchorcompartidos/random) |
 | FotosCompare | Prototipo | Google Fotos (Takeout y Picker API, con el proyecto de Google Cloud de multigdrive) | [fotoscompare](https://github.com/luchorcompartidos/fotoscompare) |
+| DiskCompare (Android APK) | Prototipo | Carpeta compartida de Windows por WiFi (SMB, solo lectura) | [diskcompare](https://github.com/luchorcompartidos/diskcompare) |
