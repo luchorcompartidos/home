@@ -4,6 +4,7 @@
 > Uso en un chat nuevo: *"Seguimos con [app]. Leé `plantilla/APK-DISPOSITIVOS-VIEJOS.md` del repo luchorcompartidos/home y `DESARROLLO.md` del repo luchorcompartidos/[repo], y aplicá la guía."*
 > Caso de referencia ya resuelto: **DiskCompare** (luchorcompartidos/diskcompare, v0.0.3, `.github/workflows/ci.yml`).
 > Al terminar en cada app: anotar la decisión en su `DESARROLLO.md` (Decisiones tomadas + Datos técnicos).
+> **No aplica a todas las apps:** solo a las que tienen **Sí** en la fila "Dispositivos viejos (Android 5/6)" de la Ficha rápida de su `DESARROLLO.md` (hoy: DiskCompare y Notas). Si la fila falta o dice "Sin definir", preguntar una vez y anotarla.
 
 ---
 
@@ -110,3 +111,4 @@ Y en el texto de la Release, una tabla **"¿Qué archivo bajar?"** con *Archivo 
 
 ## 8. Historial
 - 2026-11-24 — Guía creada a partir del caso DiskCompare v0.0.3 (tablets Android 6.0.1 y Bangho AERO J1216 Android 5.0).
+- 2026-11-24 — Se aplica solo a las apps marcadas **Sí** en la fila "Dispositivos viejos (Android 5/6)" de la plantilla `DESARROLLO.md`.

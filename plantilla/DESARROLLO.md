@@ -3,6 +3,7 @@
 > Archivo para retomar el trabajo en un chat nuevo.
 > Uso: *"Seguimos con [app], etapa [X.Y]. Leé `DESARROLLO.md` del repo luchorcompartidos/[repo]."*
 > Mantenerlo corto (idealmente menos de 1 página). Lo viejo va resumido en "Historial".
+> Apps con APK: si la fila "Dispositivos viejos" falta o dice "Sin definir", preguntarle al usuario una sola vez y anotar la respuesta.
 
 ---
 
@@ -16,6 +17,7 @@
 | Estado | [Idea / Prototipo / En uso] |
 | Última versión (Release) | [vX.Y.Z] — [AAAA-MM-DD] |
 | Se conecta con | [Google Sheets / Firebase / Softr.io / ninguno] |
+| Dispositivos viejos (Android 5/6) | [Sí / No / Sin definir / No aplica (sin APK)] — Sí: aplicar `plantilla/APK-DISPOSITIVOS-VIEJOS.md` del repo home en cada cambio |
 
 ## 2. Etapa actual
 **Etapa [X.Y] — [nombre corto de la etapa]**
