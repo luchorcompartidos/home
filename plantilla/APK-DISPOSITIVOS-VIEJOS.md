@@ -2,7 +2,7 @@
 
 > Guía para aplicar en cualquier app de la caja de apps que se distribuya como APK.
 > Uso en un chat nuevo: *"Seguimos con [app]. Leé `plantilla/APK-DISPOSITIVOS-VIEJOS.md` del repo luchorcompartidos/home y `DESARROLLO.md` del repo luchorcompartidos/[repo], y aplicá la guía."*
-> Caso de referencia ya resuelto: **DiskCompare** (luchorcompartidos/diskcompare, v0.0.3, `.github/workflows/ci.yml`).
+> Casos de referencia: **DiskCompare** (Flutter; luchorcompartidos/diskcompare, v0.0.3, `.github/workflows/ci.yml`) y **ANote...** (Capacitor; luchorcompartidos/notas, desde v0.2.1, ver sección 8).
 > Al terminar en cada app: anotar la decisión en su `DESARROLLO.md` (Decisiones tomadas + Datos técnicos).
 > **No aplica a todas las apps:** solo a las que tienen **Sí** en la fila "Dispositivos viejos (Android 5/6)" de la Ficha rápida de su `DESARROLLO.md` (hoy: DiskCompare y Notas). Si la fila falta o dice "Sin definir", preguntar una vez y anotarla.
 
@@ -109,6 +109,14 @@ Y en el texto de la Release, una tabla **"¿Qué archivo bajar?"** con *Archivo 
 - Las funciones que no existen en Android 5/6 se protegen con `if (Build.VERSION.SDK_INT >= ...)`.
 - Si el APK es universal y pesa poco, se puede dejar así. Si pesa mucho, separar por arquitectura igual que en Flutter (`splits { abi { … } }`).
 
-## 8. Historial
+## 8. Apps Capacitor (web dentro de un APK: Notas / ANote...)
+- **Instalar:** Capacitor 7 y sus plugins toman `minSdkVersion` de `android/variables.gradle` (por defecto 23 = Android 6). Para Android 5 se baja a 21 ahí; revisar los `SDK_INT` del código nativo y de los plugins (en Notas, solo los recordatorios usaban una función de Android 6 sin control).
+- **Un solo APK** suele alcanzar: si el APK no tiene `lib/` (bibliotecas nativas), es universal y anda en armeabi-v7a y x86. No hay que separar por arquitectura como en Flutter.
+- **Lo principal es la WebView** ("Android System WebView"): la de fábrica de Android 5/6 no sirve; actualizada llega a **Chromium 95** (Android 5) y **106** (Android 6). Compilar la web con un `target` que esas versiones entiendan (`es2022` pide Chromium 94).
+- CSS y JS más nuevos (`color-mix`, `:has`, `structuredClone`, `Promise.withResolvers`, …): resolver con **respaldos que solo se activan donde falta la función** (`@supports not …`, detección de funciones, compilación `legacy` de la biblioteca), así la web y el celular no cambian.
+- Mostrar un **aviso en ES5** en `index.html` si la WebView es demasiado vieja (en vez de pantalla en blanco), y la versión de Android y WebView en "Acerca de"/"Versión".
+
+## 9. Historial
 - 2026-11-24 — Guía creada a partir del caso DiskCompare v0.0.3 (tablets Android 6.0.1 y Bangho AERO J1216 Android 5.0).
 - 2026-11-24 — Se aplica solo a las apps marcadas **Sí** en la fila "Dispositivos viejos (Android 5/6)" de la plantilla `DESARROLLO.md`.
+- 2026-11-25 — Sección 8: apps Capacitor (caso ANote..., v0.2.1).
