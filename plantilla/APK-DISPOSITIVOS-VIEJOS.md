@@ -2,7 +2,7 @@
 
 > Guía para aplicar en cualquier app de la caja de apps que se distribuya como APK.
 > Uso en un chat nuevo: *"Seguimos con [app]. Leé `plantilla/APK-DISPOSITIVOS-VIEJOS.md` del repo luchorcompartidos/home y `DESARROLLO.md` del repo luchorcompartidos/[repo], y aplicá la guía."*
-> Casos de referencia: **DiskCompare** (Flutter; luchorcompartidos/diskcompare, v0.0.3, `.github/workflows/ci.yml`) y **ANote...** (Capacitor; luchorcompartidos/notas, desde v0.2.1, ver sección 8).
+> Casos de referencia: **DiskCompare** (Flutter; luchorcompartidos/diskcompare, v0.0.3, `.github/workflows/ci.yml`) y **ANote...** (Capacitor; luchorcompartidos/notas, v0.2.1–v0.2.2, ver sección 8).
 > Al terminar en cada app: anotar la decisión en su `DESARROLLO.md` (Decisiones tomadas + Datos técnicos).
 > **No aplica a todas las apps:** solo a las que tienen **Sí** en la fila "Dispositivos viejos (Android 5/6)" de la Ficha rápida de su `DESARROLLO.md` (hoy: DiskCompare y Notas). Si la fila falta o dice "Sin definir", preguntar una vez y anotarla.
 
@@ -111,6 +111,11 @@ Y en el texto de la Release, una tabla **"¿Qué archivo bajar?"** con *Archivo 
 
 ## 8. Apps Capacitor (web dentro de un APK: Notas / ANote...)
 - **Instalar:** Capacitor 7 y sus plugins toman `minSdkVersion` de `android/variables.gradle` (por defecto 23 = Android 6). Para Android 5 se baja a 21 ahí; revisar los `SDK_INT` del código nativo y de los plugins (en Notas, solo los recordatorios usaban una función de Android 6 sin control).
+- **Bibliotecas que piden más que API 21:** el *manifest merger* corta la compilación y las muestra **de a una**. Conviene agregar al CI un paso `if: failure()` que liste todas las AAR del caché de Gradle con `minSdkVersion` mayor a 21 (ver `ci.yml` de notas). En ANote... (v0.2.2) aparecieron tres:
+  - `com.google.firebase:firebase-auth` 23.x (API 23) → fijar `firebaseAuthVersion = "22.3.1"` en `variables.gradle` (para `@capacitor-firebase/authentication` 7.x).
+  - `@capacitor/filesystem` 7.1.x, que trae `io.ionic.libs:ionfilesystem-android` (API 23) → fijar `"@capacitor/filesystem": "7.0.1"` en `package.json`.
+  - `org.apache.cordova:framework` 10.1.1 (API 22 = Android 5.1), que Capacitor incluye siempre → `<uses-sdk tools:overrideLibrary="org.apache.cordova" />` en el manifiesto (con `xmlns:tools`), si la app no usa plugins de Cordova. Confirmar probando en un Android 5.0.
+- **Verificar en el CI** con `aapt dump badging` que el APK diga `sdkVersion:'21'`, y en la Release poner la tabla "¿Qué archivo bajar?" aunque haya un solo APK (Archivo | Arquitectura: universal | Para: Android 5.0 o más) y la nota de actualizar "Android System WebView".
 - **Un solo APK** suele alcanzar: si el APK no tiene `lib/` (bibliotecas nativas), es universal y anda en armeabi-v7a y x86. No hay que separar por arquitectura como en Flutter.
 - **Lo principal es la WebView** ("Android System WebView"): la de fábrica de Android 5/6 no sirve; actualizada llega a **Chromium 95** (Android 5) y **106** (Android 6). Compilar la web con un `target` que esas versiones entiendan (`es2022` pide Chromium 94).
 - CSS y JS más nuevos (`color-mix`, `:has`, `structuredClone`, `Promise.withResolvers`, …): resolver con **respaldos que solo se activan donde falta la función** (`@supports not …`, detección de funciones, compilación `legacy` de la biblioteca), así la web y el celular no cambian.
@@ -120,3 +125,4 @@ Y en el texto de la Release, una tabla **"¿Qué archivo bajar?"** con *Archivo 
 - 2026-11-24 — Guía creada a partir del caso DiskCompare v0.0.3 (tablets Android 6.0.1 y Bangho AERO J1216 Android 5.0).
 - 2026-11-24 — Se aplica solo a las apps marcadas **Sí** en la fila "Dispositivos viejos (Android 5/6)" de la plantilla `DESARROLLO.md`.
 - 2026-11-25 — Sección 8: apps Capacitor (caso ANote..., v0.2.1).
+- 2026-11-25 — Sección 8: bibliotecas que piden más que API 21 y verificación en el CI (caso ANote..., v0.2.2).
