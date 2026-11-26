@@ -2,8 +2,9 @@
 
 > Guía para aplicar en cualquier app de la caja de apps que se distribuya como APK.
 > Uso en un chat nuevo: *"Seguimos con [app]. Leé `plantilla/APK-DISPOSITIVOS-VIEJOS.md` del repo luchorcompartidos/home y `DESARROLLO.md` del repo luchorcompartidos/[repo], y aplicá la guía."*
-> Casos de referencia: **DiskCompare** (Flutter; luchorcompartidos/diskcompare, v0.0.3, `.github/workflows/ci.yml`) y **ANote...** (Capacitor; luchorcompartidos/notas, v0.2.1–v0.2.6, probada en Android 5.0 y 6.0.1; ver sección 8).
+> Casos de referencia: **DiskCompare** (Flutter; luchorcompartidos/diskcompare, v0.0.3, `.github/workflows/ci.yml`) y **ANote...** (Capacitor; luchorcompartidos/notas, v0.2.1–v0.3.1, probada en Android 5.0 y 6.0.1; ver sección 8).
 > Al terminar en cada app: anotar la decisión en su `DESARROLLO.md` (Decisiones tomadas + Datos técnicos).
+> **Mantener esta guía al día:** al cerrar cada etapa de una app con **Sí** en "Dispositivos viejos", revisar si lo hecho deja algo nuevo para esta guía (un problema, un arreglo, una versión de biblioteca, una prueba en las tablets) y, si corresponde, agregarlo en la sección del tema y en el Historial, y subirla. Sin esperar a que el usuario lo pida. La misma regla está en `plantilla/DESARROLLO.md` y en el `DESARROLLO.md` de cada app con **Sí**.
 > **No aplica a todas las apps:** solo a las que tienen **Sí** en la fila "Dispositivos viejos (Android 5/6)" de la Ficha rápida de su `DESARROLLO.md` (hoy: DiskCompare y Notas). Si la fila falta o dice "Sin definir", preguntar una vez y anotarla.
 
 ---
@@ -100,6 +101,7 @@ Y en el texto de la Release, una tabla **"¿Qué archivo bajar?"** con *Archivo 
 ## 6. Puntos a verificar según la app
 - **Firebase (por ejemplo, Notas):** las versiones recientes del SDK de Firebase para Android podrían pedir un mínimo mayor que Android 5.0, quizá Android 6.0 (API 23). **Verificarlo antes de prometer nada.** Posibles resultados: la tablet Android 6 anda y la de Android 5 no, salvo que se fijen versiones más viejas de los paquetes de Firebase en el APK de tablets.
 - **Inicio de sesión de Google / OAuth / WebView:** en Android 5/6, el navegador o el WebView del sistema puede ser muy viejo. Probar el inicio de sesión en las tablets.
+- **Alternativa sin Google: correo y contraseña de Firebase** (caso ANote..., v0.3.0): con el SDK web de Firebase dentro de la WebView no hace falta ningún plugin nativo, no sube el mínimo de Android y no depende de Play services (que en Android 5 no se actualiza desde 2024). Sirve si el inicio con Google falla en una tablet vieja. *A confirmar en la Bangho (Android 5.0).*
 - **Permisos de archivos:** en Android 5 el permiso de almacenamiento se da al instalar; en Android 6 se pide en la app (`Permission.storage`); en Android 11+ se usa `MANAGE_EXTERNAL_STORAGE`. El código tiene que contemplar los tres casos según `SDK_INT`.
 - **Notificaciones:** `POST_NOTIFICATIONS` solo existe desde Android 13; en 5 y 6 no se pide.
 
@@ -124,6 +126,8 @@ Y en el texto de la Release, una tabla **"¿Qué archivo bajar?"** con *Archivo 
 - **Un solo APK** suele alcanzar: si el APK no tiene `lib/` (bibliotecas nativas), es universal y anda en armeabi-v7a y x86. No hay que separar por arquitectura como en Flutter.
 - **Lo principal es la WebView** ("Android System WebView"): la de fábrica de Android 5/6 no sirve; actualizada llega a **Chromium 95** (Android 5) y **106** (Android 6). Compilar la web con un `target` que esas versiones entiendan (`es2022` pide Chromium 94).
 - CSS y JS más nuevos (`color-mix`, `:has`, `structuredClone`, `Promise.withResolvers`, …): resolver con **respaldos que solo se activan donde falta la función** (`@supports not …`, detección de funciones, compilación `legacy` de la biblioteca), así la web y el celular no cambian.
+- **Revisar el APK con `grep`** (en `assets/public/assets/*.js`) que no aparezcan esas funciones sin control. Ojo con las **falsas alarmas**: en ANote... `structuredClone` y `Promise.withResolvers` aparecen una vez cada una desde la v0.2.x, pero dentro de una detección (`typeof Promise.withResolvers=="function"&&typeof structuredClone=="function"…`) que elige la versión de pdfjs. Para saber si es un uso real, mirar el contexto: `grep -o ".\{70\}structuredClone.\{40\}"`, y comparar con el APK de la Release anterior.
+- **Paneles con campos de texto** (ANote..., v0.3.1): en el APK, si la WebView no se achica al abrir el teclado, el teclado tapa los paneles inferiores. Se resuelve con la variable CSS `--kb` (lo que tapa el teclado) también en el panel (`.kb-open #sheet { bottom: var(--kb) }`) y centrando el campo enfocado (`scrollIntoView`). No es propio de Android viejo, pero conviene probarlo en las tablets.
 - Mostrar un **aviso en ES5** en `index.html` si la WebView es demasiado vieja (en vez de pantalla en blanco), y la versión de Android y WebView en "Acerca de"/"Versión".
 
 ## 9. Historial
@@ -133,3 +137,4 @@ Y en el texto de la Release, una tabla **"¿Qué archivo bajar?"** con *Archivo 
 - 2026-11-25 — Sección 8: bibliotecas que piden más que API 21 y verificación en el CI (caso ANote..., v0.2.2).
 - 2026-11-25 — Sección 8: cierre al abrir en Android 5.0, atrapador de cierres y arreglo de `@capacitor/status-bar` (caso ANote..., v0.2.5–v0.2.6).
 - 2026-11-26 — Sección 8: ANote... v0.2.6 probada con éxito en Android 5.0 y 6.0.1 (cierre de la Parte 3); portapapeles con plugin propio (v0.2.7).
+- 2026-11-26 — Secciones 6 y 8: inicio con correo y contraseña de Firebase como alternativa sin Play services (ANote... v0.3.0), falsas alarmas al revisar el APK con `grep` y paneles con teclado (v0.3.1). Regla nueva: revisar y actualizar esta guía al cerrar cada etapa de una app con **Sí**.

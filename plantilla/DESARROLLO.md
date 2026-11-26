@@ -4,6 +4,7 @@
 > Uso: *"Seguimos con [app], etapa [X.Y]. Leé `DESARROLLO.md` del repo luchorcompartidos/[repo]."*
 > Mantenerlo corto (idealmente menos de 1 página). Lo viejo va resumido en "Historial".
 > Apps con APK: si la fila "Dispositivos viejos" falta o dice "Sin definir", preguntarle al usuario una sola vez y anotar la respuesta.
+> Apps con **Sí** en "Dispositivos viejos": al cerrar cada etapa, revisar si lo hecho deja algo nuevo para `plantilla/APK-DISPOSITIVOS-VIEJOS.md` del repo home (un problema, un arreglo, una versión de biblioteca, una prueba en las tablets) y, si corresponde, actualizarla (sección del tema + Historial) y subirla. No hace falta que el usuario lo pida.
 
 ---
 
@@ -17,7 +18,7 @@
 | Estado | [Idea / Prototipo / En uso] |
 | Última versión (Release) | [vX.Y.Z] — [AAAA-MM-DD] |
 | Se conecta con | [Google Sheets / Firebase / Softr.io / ninguno] |
-| Dispositivos viejos (Android 5/6) | [Sí / No / Sin definir / No aplica (sin APK)] — Sí: aplicar `plantilla/APK-DISPOSITIVOS-VIEJOS.md` del repo home en cada cambio |
+| Dispositivos viejos (Android 5/6) | [Sí / No / Sin definir / No aplica (sin APK)] — Sí: aplicar `plantilla/APK-DISPOSITIVOS-VIEJOS.md` del repo home en cada cambio y, al cerrar cada etapa, revisar si lo hecho deja algo nuevo para esa guía (un problema, un arreglo, una versión de biblioteca, una prueba en las tablets) y, si corresponde, actualizarla (sección del tema + Historial) y subirla al repo home |
 
 ## 2. Etapa actual
 **Etapa [X.Y] — [nombre corto de la etapa]**
@@ -49,4 +50,4 @@
 - [vX.Y] [AAAA-MM-DD] — [qué cambió, una línea]
 
 ---
-*Al cerrar cada sesión: actualizar secciones 1, 2, 3 y 7, y subir el archivo al repo.*
+*Al cerrar cada sesión: actualizar secciones 1, 2, 3 y 7, y subir el archivo al repo. Si "Dispositivos viejos" es **Sí**, revisar también `plantilla/APK-DISPOSITIVOS-VIEJOS.md` (repo home) y actualizarla si corresponde.*
