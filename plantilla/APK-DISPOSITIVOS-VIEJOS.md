@@ -2,7 +2,7 @@
 
 > Guía para aplicar en cualquier app de la caja de apps que se distribuya como APK.
 > Uso en un chat nuevo: *"Seguimos con [app]. Leé `plantilla/APK-DISPOSITIVOS-VIEJOS.md` del repo luchorcompartidos/home y `DESARROLLO.md` del repo luchorcompartidos/[repo], y aplicá la guía."*
-> Casos de referencia: **DiskCompare** (Flutter; luchorcompartidos/diskcompare, v0.0.3, `.github/workflows/ci.yml`) y **ANote...** (Capacitor; luchorcompartidos/notas, v0.2.1–v0.2.6, ver sección 8).
+> Casos de referencia: **DiskCompare** (Flutter; luchorcompartidos/diskcompare, v0.0.3, `.github/workflows/ci.yml`) y **ANote...** (Capacitor; luchorcompartidos/notas, v0.2.1–v0.2.6, probada en Android 5.0 y 6.0.1; ver sección 8).
 > Al terminar en cada app: anotar la decisión en su `DESARROLLO.md` (Decisiones tomadas + Datos técnicos).
 > **No aplica a todas las apps:** solo a las que tienen **Sí** en la fila "Dispositivos viejos (Android 5/6)" de la Ficha rápida de su `DESARROLLO.md` (hoy: DiskCompare y Notas). Si la fila falta o dice "Sin definir", preguntar una vez y anotarla.
 
@@ -118,6 +118,8 @@ Y en el texto de la Release, una tabla **"¿Qué archivo bajar?"** con *Archivo 
 - **Que compile no alcanza:** con el mínimo bajado a 21, una biblioteca puede llamar a una función de Android 6+ sin control y la app **se instala pero se cierra al abrir** ("Se ha detenido la aplicación"). En la tablet Android 6 anda, en la de Android 5.0 no.
   - **Ver el error en el equipo:** ANote... (v0.2.5) tiene un **atrapador de cierres**: un `Application` propio (`AnoteApp`) con `UncaughtExceptionHandler` que abre una pantalla en proceso aparte (`CierreActivity`, `:cierre`, solo vistas de Android) con el error y botones Copiar / Enviar…. Copiar los dos `.java` de `notas/android-extra/java/` y el bloque del manifiesto de `patch-android.py`. Sirve para cualquier app nativa (Capacitor o Kotlin). No atrapa cierres nativos (de la WebView): para eso, `adb logcat` desde la PC.
   - **Caso ANote... (v0.2.6):** `@capacitor/status-bar` 7.0.6 llama a `View.getRootWindowInsets()` (API 23) al cargarse → `NoSuchMethodError` en Android 5.0. Se corrige el `.java` del plugin en `node_modules` desde `patch-android.py` (Gradle compila los plugins desde ahí), con `if (SDK_INT < 23)` y el alto del recurso `status_bar_height`. Con un `assert`, para que el CI corte si el plugin cambia.
+  - **Resultado ANote... (v0.2.6, 2026-11-26):** con el arreglo de `@capacitor/status-bar` la app abre y anda en la Bangho (Android 5.0, WebView 95) y en la tablet Android 6.0.1. El puente de Cordova con `tools:overrideLibrary` no dio problemas. Un solo APK universal para los tres equipos.
+- **Portapapeles:** la WebView no deja leer el portapapeles desde JavaScript (`navigator.clipboard.readText` falla sin permiso). ANote... (v0.2.7) usa un plugin propio chico (`PortapapelesPlugin.java`, con `ClipboardManager`, que existe desde Android 3) registrado en `MainActivity`; no suma dependencias ni sube el mínimo de Android.
 - **Verificar en el CI** con `aapt dump badging` que el APK diga `sdkVersion:'21'`, y en la Release poner la tabla "¿Qué archivo bajar?" aunque haya un solo APK (Archivo | Arquitectura: universal | Para: Android 5.0 o más) y la nota de actualizar "Android System WebView".
 - **Un solo APK** suele alcanzar: si el APK no tiene `lib/` (bibliotecas nativas), es universal y anda en armeabi-v7a y x86. No hay que separar por arquitectura como en Flutter.
 - **Lo principal es la WebView** ("Android System WebView"): la de fábrica de Android 5/6 no sirve; actualizada llega a **Chromium 95** (Android 5) y **106** (Android 6). Compilar la web con un `target` que esas versiones entiendan (`es2022` pide Chromium 94).
@@ -130,3 +132,4 @@ Y en el texto de la Release, una tabla **"¿Qué archivo bajar?"** con *Archivo 
 - 2026-11-25 — Sección 8: apps Capacitor (caso ANote..., v0.2.1).
 - 2026-11-25 — Sección 8: bibliotecas que piden más que API 21 y verificación en el CI (caso ANote..., v0.2.2).
 - 2026-11-25 — Sección 8: cierre al abrir en Android 5.0, atrapador de cierres y arreglo de `@capacitor/status-bar` (caso ANote..., v0.2.5–v0.2.6).
+- 2026-11-26 — Sección 8: ANote... v0.2.6 probada con éxito en Android 5.0 y 6.0.1 (cierre de la Parte 3); portapapeles con plugin propio (v0.2.7).
