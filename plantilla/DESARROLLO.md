@@ -43,7 +43,7 @@
 - Archivos principales: [index.html, app.js, …]
 - Configuración / servicios: [IDs, hojas, proyectos (sin claves ni contraseñas)]
 - Cómo se publica: [push a main → GitHub Pages / GitHub Actions compila APK / …]
-- Cómo se prueba: [node, navegador, en el equipo…]. En el entorno de Claude no hay red para `npm install`, pero sí `git clone` desde GitHub y hay `esbuild` y `typescript` en `/opt/npm-tools` (y `bun`): se pueden bajar las bibliotecas desde su repo de GitHub y armar un paquete de prueba con el código real (ejemplo: `pruebas/tablas/` del repo notas, con ProseMirror).
+- Cómo se prueba: [node, navegador, en el equipo…]. En el entorno de Claude no hay red para `npm install`, pero sí `git clone` desde GitHub y hay `esbuild` y `typescript` en `/opt/npm-tools` (y `bun`): se pueden bajar las bibliotecas desde su repo de GitHub y armar un paquete de prueba con el código real (ejemplo: `pruebas/tablas/` del repo notas, con ProseMirror). En `/opt/npm-tools` también están `docx`, `jszip`, `pdf-lib`, `pdfjs-dist` y `xml`, y en el sistema `pdftoppm`, LibreOffice (`soffice --headless`), `python-docx` y `mammoth` de Python: sirven para generar los archivos que exporta una app y mirarlos de verdad (ejemplo: `pruebas/exportar/` del repo notas, con docx y jsPDF).
 - Releases: según `ESTANDAR-VERSIONES.md` del repo home (`[major]` / `[minor]` / `[patch]` / `[skip release]` en el commit; cambios que no tocan la app van sin release)
 
 ## 7. Historial (resumido)
