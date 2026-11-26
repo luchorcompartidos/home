@@ -18,6 +18,11 @@ compila de prueba (APK en Artifacts) en lugar de solo avisar.
 Las versiones viejas de dos números (v0.1, v0.2) quedan como están; el orden se calcula bien.
 El tipo se indica en el mensaje del commit: `[major]`, `[minor]`, `[patch]` o `[skip release]`.
 
+**Opcional, para apps cuyo flujo compila algo pesado (por ejemplo un APK):** en el `on: push:` del flujo, agregar
+`paths-ignore: ['**.md']`, así un push que solo cambia documentos (DESARROLLO.md, README.md) no corre el flujo
+(no compila ni puede fallar por problemas pasajeros, como el 429 de Maven). Para correrlo igual: *Run workflow*.
+Caso de referencia: `ci.yml` de luchorcompartidos/notas (ANote..., v0.3.4).
+
 ## Las tres piezas
 
 1. **Número escrito en el HTML**: `<meta name="app-version" content="vX.Y.Z">` en el `<head>`.
