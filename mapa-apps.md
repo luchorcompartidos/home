@@ -15,6 +15,8 @@ flowchart LR
         RND["Random<br/>Selecciones aleatorias con reglas y pesos<br/><small>Prototipo</small>"]
         FOTOS["FotosCompare<br/>Google Fotos vs. dispositivo: respaldos y duplicados<br/><small>Prototipo</small>"]
         DISK["DiskCompare (Android APK)<br/>Uso del almacenamiento y comparación con la PC<br/><small>Prototipo</small>"]
+        ANOTE["ANote... (Web + APK)<br/>Notas sincronizadas y compartidas<br/><small>En uso</small>"]
+        PLAN["Planillas (Web + APK + Windows)<br/>Hojas tipo Excel con vista Ficha<br/><small>Idea</small>"]
     end
 
     subgraph EXT["Servicios externos"]
@@ -25,6 +27,7 @@ flowchart LR
         IA(["IA: Gemini / Claude"])
         GF(["Google Fotos (Takeout y Picker API)"])
         WIN(["PC con Windows (carpeta compartida SMB)"])
+        FB[("Firebase notas-pro-2026")]
     end
 
     ABM --> GS
@@ -36,16 +39,18 @@ flowchart LR
     CV -. JSON .-> JOB
     FOTOS --> GF
     DISK -. WiFi .-> WIN
+    ANOTE --> FB
+    PLAN -. mismas cuentas .-> FB
 
     classDef enuso fill:#c8e6c9,stroke:#2e7d32,color:#1b1b1b
     classDef prototipo fill:#fff3b0,stroke:#b38f00,color:#1b1b1b
     classDef idea fill:#eeeeee,stroke:#757575,color:#1b1b1b
     classDef servicio fill:#cfe3ff,stroke:#1e5aa8,color:#1b1b1b
 
-    class CV,CIF,REC enuso
+    class CV,CIF,REC,ANOTE enuso
     class ABM,PANEL,SUPER,JOB,RND,FOTOS,DISK prototipo
-    class SOFTRL idea
-    class GS,SOFTR,GAS,IA,GF,WIN servicio
+    class SOFTRL,PLAN idea
+    class GS,SOFTR,GAS,IA,GF,WIN,FB servicio
 ```
 
 **Referencias:** verde = En uso · amarillo = Prototipo · gris = Idea · azul = servicio externo
@@ -63,3 +68,5 @@ flowchart LR
 | Random | Prototipo | — | [random](https://github.com/luchorcompartidos/random) |
 | FotosCompare | Prototipo | Google Fotos (Takeout y Picker API, con el proyecto de Google Cloud de multigdrive) | [fotoscompare](https://github.com/luchorcompartidos/fotoscompare) |
 | DiskCompare (Android APK) | Prototipo | Carpeta compartida de Windows por WiFi (SMB, solo lectura) | [diskcompare](https://github.com/luchorcompartidos/diskcompare) |
+| ANote... (Web + Android APK) | En uso | Firebase (proyecto notas-pro-2026) | [notas](https://github.com/luchorcompartidos/notas) |
+| Planillas (nombre a definir; Web + APK + Windows) | Idea | Firebase (notas-pro-2026, mismas cuentas que ANote...) | planillas (a crear) · plan en `borradores/planillas/DESARROLLO.md` |
