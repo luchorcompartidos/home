@@ -27,8 +27,8 @@ Caso de referencia: `ci.yml` de luchorcompartidos/notas (ANote..., v0.3.4).
 (`name: github-pages-${{ github.run_attempt }}` en `upload-pages-artifact` y el mismo `artifact_name` en `deploy-pages`)
 y un segundo intento automático (`continue-on-error: true` en el primero, `sleep 30` y otro `deploy-pages` con
 `if: steps.deploy.outcome == 'failure'`). Así el error pasajero "No artifacts named github-pages" se resuelve solo, y
-*Re-run failed jobs* ya no falla con "Multiple artifacts named github-pages". Caso de referencia: `ci.yml` de
-luchorcompartidos/planillas (v0.0.2).
+*Re-run failed jobs* ya no falla con "Multiple artifacts named github-pages". Casos de referencia: `ci.yml` de
+luchorcompartidos/planillas (v0.0.2) y de luchorcompartidos/notas (ANote..., v0.4.1).
 
 ## Las tres piezas
 

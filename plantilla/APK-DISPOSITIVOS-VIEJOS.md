@@ -145,3 +145,4 @@ Y en el texto de la Release, una tabla **"¿Qué archivo bajar?"** con *Archivo 
 - 2026-11-26 — ANote... v0.3.9 (tablas: exportar celdas combinadas a PDF, docx, md y txt) no sumó nada nativo ni CSS/JS nuevo: el `grep` del APK da las mismas cuentas que en la v0.3.8 (y la v0.3.4). Cierra combinar celdas.
 - 2026-11-26 — ANote... v0.4.0 (administración de usuarios: listado, cerrar sesión en todos los dispositivos, pedir contraseña propia) no sumó nada nativo ni CSS/JS nuevo: el `grep` del APK da las mismas cuentas que en la v0.3.9 (falsas alarmas de pdfjs). Sin cambios en las secciones.
 - 2026-11-27 — Sección 8: app Capacitor nueva desde cero con el esqueleto de ANote... (caso Planillas v0.0.1: compiló a la primera con mínimo Android 5.0). Planillas se suma a las apps con **Sí**.
+- 2026-11-27 — ANote... v0.4.1 (solo CI: reintento de `deploy-pages`) no cambió la app: nada nuevo para esta guía.
