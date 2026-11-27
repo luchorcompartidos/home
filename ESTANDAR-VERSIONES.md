@@ -23,6 +23,13 @@ El tipo se indica en el mensaje del commit: `[major]`, `[minor]`, `[patch]` o `[
 (no compila ni puede fallar por problemas pasajeros, como el 429 de Maven). Para correrlo igual: *Run workflow*.
 Caso de referencia: `ci.yml` de luchorcompartidos/notas (ANote..., v0.3.4).
 
+**Recomendado, para apps que publican la web con `actions/deploy-pages`:** dar al paquete un nombre por intento
+(`name: github-pages-${{ github.run_attempt }}` en `upload-pages-artifact` y el mismo `artifact_name` en `deploy-pages`)
+y un segundo intento automático (`continue-on-error: true` en el primero, `sleep 30` y otro `deploy-pages` con
+`if: steps.deploy.outcome == 'failure'`). Así el error pasajero "No artifacts named github-pages" se resuelve solo, y
+*Re-run failed jobs* ya no falla con "Multiple artifacts named github-pages". Caso de referencia: `ci.yml` de
+luchorcompartidos/planillas (v0.0.2).
+
 ## Las tres piezas
 
 1. **Número escrito en el HTML**: `<meta name="app-version" content="vX.Y.Z">` en el `<head>`.
