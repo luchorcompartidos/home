@@ -30,6 +30,11 @@ y un segundo intento automático (`continue-on-error: true` en el primero, `slee
 *Re-run failed jobs* ya no falla con "Multiple artifacts named github-pages". Casos de referencia: `ci.yml` de
 luchorcompartidos/planillas (v0.0.2) y de luchorcompartidos/notas (ANote..., v0.4.1).
 
+**Recomendado, para apps que compilan un APK con Gradle:** reintentar la compilación hasta 3 veces, con 60 s de espera
+(`for i in 1 2 3; do ./gradlew "$TASK" … && exit 0; sleep 60; done; exit 1`). Así el 429 pasajero de Maven Central
+("Too Many Requests") se resuelve solo, sin *Re-run failed jobs*. Contra: un error real de compilación tarda unos
+minutos más en avisar. Caso de referencia: `ci.yml` de luchorcompartidos/planillas (v0.0.3).
+
 ## Las tres piezas
 
 1. **Número escrito en el HTML**: `<meta name="app-version" content="vX.Y.Z">` en el `<head>`.

@@ -69,4 +69,4 @@ flowchart LR
 | FotosCompare | Prototipo | Google Fotos (Takeout y Picker API, con el proyecto de Google Cloud de multigdrive) | [fotoscompare](https://github.com/luchorcompartidos/fotoscompare) |
 | DiskCompare (Android APK) | Prototipo | Carpeta compartida de Windows por WiFi (SMB, solo lectura) | [diskcompare](https://github.com/luchorcompartidos/diskcompare) |
 | ANote... (Web + Android APK) | En uso | Firebase (proyecto notas-pro-2026) | [notas](https://github.com/luchorcompartidos/notas) |
-| Planillas (nombre a definir; Web + APK + Windows) | Prototipo (v0.0.1) | Firebase (notas-pro-2026, mismas cuentas que ANote...; desde la Etapa 2) | [planillas](https://github.com/luchorcompartidos/planillas) |
+| Planillas (nombre a definir; Web + APK + Windows) | Prototipo (v0.0.3) | Firebase (notas-pro-2026, mismas cuentas que ANote...; desde la Etapa 2) | [planillas](https://github.com/luchorcompartidos/planillas) |
