@@ -16,7 +16,7 @@ flowchart LR
         FOTOS["FotosCompare<br/>Google Fotos vs. dispositivo: respaldos y duplicados<br/><small>Prototipo</small>"]
         DISK["DiskCompare (Android APK)<br/>Uso del almacenamiento y comparación con la PC<br/><small>Prototipo</small>"]
         ANOTE["ANote... (Web + APK)<br/>Notas sincronizadas y compartidas<br/><small>En uso</small>"]
-        PLAN["Planillas (Web + APK + Windows)<br/>Hojas tipo Excel con vistas Reporte y Ficha<br/>Importa/exporta .xlsx y .csv; copiar/pegar con Excel<br/><small>Prototipo</small>"]
+        PLAN["Planillas (Web + APK + Windows)<br/>Hojas tipo Excel con vistas Reporte y Ficha<br/>Importa/exporta .xlsx y .csv; copiar/pegar con Excel<br/>Cuenta con correo (la de ANote...)<br/><small>Prototipo</small>"]
     end
 
     subgraph EXT["Servicios externos"]
@@ -69,4 +69,4 @@ flowchart LR
 | FotosCompare | Prototipo | Google Fotos (Takeout y Picker API, con el proyecto de Google Cloud de multigdrive) | [fotoscompare](https://github.com/luchorcompartidos/fotoscompare) |
 | DiskCompare (Android APK) | Prototipo | Carpeta compartida de Windows por WiFi (SMB, solo lectura) | [diskcompare](https://github.com/luchorcompartidos/diskcompare) |
 | ANote... (Web + Android APK) | En uso | Firebase (proyecto notas-pro-2026) | [notas](https://github.com/luchorcompartidos/notas) |
-| Planillas (nombre a definir; Web + APK + Windows) | Prototipo (v0.0.8) | Importa/exporta Excel (.xlsx) y CSV; Firebase (notas-pro-2026, mismas cuentas que ANote...; desde la Etapa 2) | [planillas](https://github.com/luchorcompartidos/planillas) |
+| Planillas (nombre a definir; Web + APK + Windows) | Prototipo (v0.0.9) | Importa/exporta Excel (.xlsx) y CSV; Firebase (notas-pro-2026, mismas cuentas que ANote...: inicio con correo desde la v0.0.9, nube en la Etapa 2b) | [planillas](https://github.com/luchorcompartidos/planillas) |
