@@ -16,7 +16,7 @@ flowchart LR
         FOTOS["FotosCompare<br/>Google Fotos vs. dispositivo: respaldos y duplicados<br/><small>Prototipo</small>"]
         DISK["DiskCompare (Android APK)<br/>Uso del almacenamiento, duplicados y comparación con la PC<br/><small>Prototipo</small>"]
         ANOTE["ANote... (Web + APK)<br/>Notas sincronizadas y compartidas<br/><small>En uso</small>"]
-        PLAN["Planillas (Web + APK + Windows)<br/>Hojas tipo Excel con vistas Reporte y Ficha<br/>Importa/exporta .xlsx y .csv; copiar/pegar con Excel<br/>Cuenta con correo (la de ANote...), nube y compartir (invitación y link)<br/><small>Prototipo</small>"]
+        PLAN["Planillas (Web + APK + Windows)<br/>Hojas tipo Excel con vistas Reporte y Ficha<br/>Importa/exporta .xlsx y .csv; copiar/pegar con Excel<br/>Cuenta con correo (la de ANote...), nube y compartir (invitación y link)<br/>Cambios de varios dispositivos fusionados por celda<br/><small>Prototipo</small>"]
     end
 
     subgraph EXT["Servicios externos"]
@@ -69,4 +69,4 @@ flowchart LR
 | FotosCompare | Prototipo | Google Fotos (Takeout y Picker API, con el proyecto de Google Cloud de multigdrive) | [fotoscompare](https://github.com/luchorcompartidos/fotoscompare) |
 | DiskCompare (Android APK) | Prototipo | Carpeta compartida de Windows por WiFi (SMB, solo lectura) | [diskcompare](https://github.com/luchorcompartidos/diskcompare) |
 | ANote... (Web + Android APK) | En uso | Firebase (proyecto notas-pro-2026) | [notas](https://github.com/luchorcompartidos/notas) |
-| Planillas (nombre a definir; Web + APK + Windows) | Prototipo (v0.0.13) | Importa/exporta Excel (.xlsx) y CSV; Firebase (notas-pro-2026, mismas cuentas que ANote...: inicio con correo desde la v0.0.9, nube desde la v0.0.10, compartir por invitación desde la v0.0.11 y por link con pedido de acceso desde la v0.0.12; reglas en un bloque propio junto a las de ANote...); App Links desde la v0.0.13 (`assetlinks.json` en luchorcompartidos.github.io, junto al de ANote...) | [planillas](https://github.com/luchorcompartidos/planillas) |
+| Planillas (nombre a definir; Web + APK + Windows) | Prototipo (v0.0.14) | Importa/exporta Excel (.xlsx) y CSV; Firebase (notas-pro-2026, mismas cuentas que ANote...: inicio con correo desde la v0.0.9, nube desde la v0.0.10, compartir por invitación desde la v0.0.11 y por link con pedido de acceso desde la v0.0.12; reglas en un bloque propio junto a las de ANote...); App Links desde la v0.0.13 (`assetlinks.json` en luchorcompartidos.github.io, junto al de ANote...); sincronización por celda con Yjs desde la v0.0.14 (como ANote...) | [planillas](https://github.com/luchorcompartidos/planillas) |
