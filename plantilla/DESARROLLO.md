@@ -3,6 +3,7 @@
 > Archivo para retomar el trabajo en un chat nuevo.
 > Uso: *"Seguimos con [app], etapa [X.Y]. Leé `DESARROLLO.md` del repo luchorcompartidos/[repo]."*
 > Mantenerlo corto (idealmente menos de 1 página). Lo viejo va resumido en "Historial".
+> Si crece mucho (más de ~30 KB, caro de leer en cada chat nuevo), pasar el detalle (decisiones completas, pruebas paso a paso, datos técnicos, historial completo) a un `DESARROLLO-TECNICO.md` y dejar acá solo el resumen, con la indicación de buscar en ese archivo solo el tema que se va a tocar (ejemplo: repo notas, desde la v0.5.3).
 > Apps con APK: si la fila "Dispositivos viejos" falta o dice "Sin definir", preguntarle al usuario una sola vez y anotar la respuesta.
 > Apps con **Sí** en "Dispositivos viejos": al cerrar cada etapa, revisar si lo hecho deja algo nuevo para `plantilla/APK-DISPOSITIVOS-VIEJOS.md` del repo home (un problema, un arreglo, una versión de biblioteca, una prueba en las tablets) y, si corresponde, actualizarla (sección del tema + Historial) y subirla. No hace falta que el usuario lo pida.
 
