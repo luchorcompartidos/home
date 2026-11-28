@@ -14,7 +14,7 @@ flowchart LR
         JOB["Job Post ATS Analizer<br/>Avisos, CV y postulaciones<br/><small>Prototipo</small>"]
         RND["Random<br/>Selecciones aleatorias con reglas y pesos<br/><small>Prototipo</small>"]
         FOTOS["FotosCompare<br/>Google Fotos vs. dispositivo: respaldos y duplicados<br/><small>Prototipo</small>"]
-        DISK["DiskCompare (Android APK)<br/>Uso del almacenamiento y comparación con la PC<br/><small>Prototipo</small>"]
+        DISK["DiskCompare (Android APK)<br/>Uso del almacenamiento, duplicados y comparación con la PC<br/><small>Prototipo</small>"]
         ANOTE["ANote... (Web + APK)<br/>Notas sincronizadas y compartidas<br/><small>En uso</small>"]
         PLAN["Planillas (Web + APK + Windows)<br/>Hojas tipo Excel con vistas Reporte y Ficha<br/>Importa/exporta .xlsx y .csv; copiar/pegar con Excel<br/>Cuenta con correo (la de ANote...)<br/><small>Prototipo</small>"]
     end
